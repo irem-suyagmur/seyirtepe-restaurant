@@ -5,6 +5,7 @@ from pathlib import Path
 from app.api.v1.api import api_router
 from app.config import settings
 from app.database import init_db
+import os
 
 app = FastAPI(
     title="Seyirtepe Restaurant Cafe API",
@@ -29,6 +30,15 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
+    
+    # İlk deployment'ta seed data yükle
+    if os.getenv("AUTO_SEED", "false").lower() == "true":
+        try:
+            from seed_data import seed_database
+            seed_database()
+            print("✅ Seed data başarıyla yüklendi!")
+        except Exception as e:
+            print(f"⚠️ Seed data yüklenemedi: {e}")
 
 # API router
 app.include_router(api_router, prefix="/api/v1")
