@@ -47,11 +47,11 @@ const AdminLayout = () => {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
+        className={`fixed top-0 left-0 z-40 h-screen w-[85vw] max-w-64 transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
-        <div className="h-full px-3 py-4 overflow-y-auto backdrop-blur-2xl bg-white/5 border-r border-white/10">
+        <div className="h-full px-3 py-4 backdrop-blur-2xl bg-white/5 border-r border-white/10 flex flex-col">
           {/* Logo */}
           <div className="flex items-center gap-3 px-4 mb-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
@@ -64,7 +64,7 @@ const AdminLayout = () => {
           </div>
 
           {/* Menu Items */}
-          <nav className="space-y-2">
+          <nav className="space-y-2 flex-1 overflow-y-auto pr-1">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.path
@@ -86,7 +86,7 @@ const AdminLayout = () => {
           </nav>
 
           {/* Logout Button */}
-          <div className="absolute bottom-4 left-3 right-3">
+          <div className="pt-4">
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200"
@@ -110,7 +110,7 @@ const AdminLayout = () => {
       <div className="lg:ml-64">
         {/* Top Bar */}
         <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/5 border-b border-white/10">
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-3 px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
@@ -122,13 +122,13 @@ const AdminLayout = () => {
               )}
             </button>
 
-            <div className="flex items-center gap-4 ml-auto">
+            <div className="flex items-center gap-2 sm:gap-4 ml-auto flex-wrap justify-end">
               <AdminNotifier />
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-white">Admin</p>
                 <p className="text-xs text-white/60">admin@seyirtepe.com</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
             </div>

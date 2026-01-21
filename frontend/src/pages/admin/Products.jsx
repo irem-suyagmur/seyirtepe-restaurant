@@ -214,7 +214,7 @@ function Products() {
   return (
     <div className="space-y-8">
       {/* Modern Header with Gradient */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-purple-500/20 border border-purple-500/30 backdrop-blur-xl p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-purple-500/20 border border-purple-500/30 backdrop-blur-xl p-4 sm:p-6 lg:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-2">
@@ -418,7 +418,7 @@ function Products() {
 
       {filteredProducts.length === 0 && (
         <div className="text-center py-20">
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-16 max-w-md mx-auto">
+          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-16 max-w-md mx-auto">
             <ImageIcon className="w-20 h-20 text-white/20 mx-auto mb-6" />
             <p className="text-white/60 text-xl font-light">Ürün bulunamadı</p>
             <button
@@ -433,33 +433,33 @@ function Products() {
 
       {/* Modern Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="relative w-full max-w-5xl my-8">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+          <div className="relative w-full max-w-5xl my-2 sm:my-8">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl">
               {/* Modal Header with Gradient */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 border-b border-white/10 p-4 sm:p-6">
+              <div className="sticky top-0 z-10 relative overflow-hidden bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 border-b border-white/10 p-3 sm:p-6 backdrop-blur-2xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl" />
-                <div className="relative flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                      <Package className="w-5 h-5 text-white" />
+                <div className="relative flex justify-between items-center gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shrink-0">
+                      <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white">
+                    <h2 className="text-base sm:text-2xl font-bold text-white truncate">
                       {editingProduct ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'}
                     </h2>
                   </div>
                   <button
                     onClick={handleCloseModal}
-                    className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all flex items-center justify-center"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all flex items-center justify-center shrink-0"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Modal Body */}
-              <form onSubmit={handleSubmit} className="p-4 sm:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="p-3 sm:p-6 max-h-[80vh] overflow-y-auto overscroll-contain">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Left Column */}
                   <div className="space-y-5">
                     {/* Product Name */}
@@ -555,7 +555,7 @@ function Products() {
                       <label className="text-sm font-medium text-white/80">
                         Ürün Görseli
                       </label>
-                      <div className="border-2 border-dashed border-white/10 rounded-xl p-4 bg-white/5 h-[400px] flex items-center justify-center">
+                      <div className="border-2 border-dashed border-white/10 rounded-xl p-2 sm:p-4 bg-white/5 h-40 sm:h-56 lg:h-[320px] flex items-center justify-center">
                         {(localImagePreview || formData.image_url) ? (
                           <div className="relative w-full h-full">
                             <img
@@ -587,9 +587,9 @@ function Products() {
                           </div>
                         ) : (
                           <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                            <Upload className="w-16 h-16 text-white/40 mb-4" />
-                            <span className="text-sm text-white/60 mb-1 text-center">Resim yüklemek için tıklayın</span>
-                            <span className="text-xs text-white/40">PNG, JPG (Max 5MB)</span>
+                            <Upload className="w-10 h-10 sm:w-16 sm:h-16 text-white/40 mb-2 sm:mb-4" />
+                            <span className="text-xs sm:text-sm text-white/60 mb-1 text-center">Resim yüklemek için tıklayın</span>
+                            <span className="text-[10px] sm:text-xs text-white/40">PNG, JPG (Max 5MB)</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -647,9 +647,9 @@ function Products() {
 
       {/* Delete Confirmation Modal */}
       {deleteModal.show && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="relative w-full max-w-md">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-red-500/30 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-red-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="relative overflow-hidden bg-gradient-to-r from-red-500/20 via-red-600/20 to-red-500/20 border-b border-red-500/30 p-6">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/20 rounded-full blur-3xl" />

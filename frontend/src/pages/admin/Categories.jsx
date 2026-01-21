@@ -111,7 +111,7 @@ export default function Categories() {
   return (
     <div className="space-y-8">
       {/* Modern Header with Gradient */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-500/30 backdrop-blur-xl p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-500/30 backdrop-blur-xl p-4 sm:p-6 lg:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function Categories() {
 
       {categories.length === 0 && (
         <div className="text-center py-20">
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-16 max-w-md mx-auto">
+          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-16 max-w-md mx-auto">
             <Tag className="w-20 h-20 text-white/20 mx-auto mb-6" />
             <p className="text-white/60 text-xl font-light">Henüz kategori eklenmemiş</p>
             <button
@@ -271,11 +271,11 @@ export default function Categories() {
 
       {/* Modern Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="relative w-full max-w-lg">
+            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl max-h-[90vh] flex flex-col">
               {/* Modal Header with Gradient */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-white/10 p-6">
+              <div className="sticky top-0 z-10 relative overflow-hidden bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-white/10 p-4 sm:p-6 backdrop-blur-2xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl" />
                 <div className="relative flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -296,7 +296,7 @@ export default function Categories() {
               </div>
 
               {/* Modal Body */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto overscroll-contain min-h-0">
                 {/* Category Name */}
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-white/80">
@@ -373,9 +373,9 @@ export default function Categories() {
 
       {/* Delete Confirmation Modal */}
       {deleteModal.show && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="relative w-full max-w-md">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-red-500/30 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-red-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="relative overflow-hidden bg-gradient-to-r from-red-500/20 via-red-600/20 to-red-500/20 border-b border-red-500/30 p-6">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/20 rounded-full blur-3xl" />

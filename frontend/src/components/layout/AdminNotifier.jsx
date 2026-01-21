@@ -248,7 +248,7 @@ export default function AdminNotifier() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
       {toast.text ? (
         <div
           className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border backdrop-blur-xl text-xs ${
@@ -265,17 +265,17 @@ export default function AdminNotifier() {
       <button
         type="button"
         onClick={onTest}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 backdrop-blur-xl transition-all"
+        className="flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20 backdrop-blur-xl transition-all"
         title="Test bildirimi (ses çal)"
       >
         <Play className="w-4 h-4" />
-        <span className="font-medium">Test Ses</span>
+        <span className="hidden sm:inline font-medium">Test Ses</span>
       </button>
 
       <button
         type="button"
         onClick={onToggle}
-        className={`flex items-center gap-2 px-3 py-2 rounded-xl border backdrop-blur-xl transition-all ${
+        className={`flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border backdrop-blur-xl transition-all ${
           enabled
             ? 'bg-red-500/15 border-red-500/30 text-red-200 hover:bg-red-500/20'
             : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'

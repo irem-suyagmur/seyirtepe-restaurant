@@ -105,7 +105,7 @@ function Reservations() {
   return (
     <div className="space-y-8">
       {/* Modern Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-green-500/20 border border-green-500/30 backdrop-blur-xl p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-green-500/20 border border-green-500/30 backdrop-blur-xl p-4 sm:p-6 lg:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-4">
@@ -269,7 +269,7 @@ function Reservations() {
               </div>
 
               {/* Status & Actions */}
-              <div className="lg:col-span-3 flex items-center gap-3">
+              <div className="lg:col-span-3 flex flex-wrap items-center gap-3">
                 <div className={`px-4 py-2 rounded-xl bg-gradient-to-r ${getStatusColor(reservation.status)} border backdrop-blur-xl font-medium text-sm`}>
                   {getStatusText(reservation.status)}
                 </div>
@@ -294,7 +294,7 @@ function Reservations() {
 
       {filteredReservations.length === 0 && (
         <div className="text-center py-20">
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-16 max-w-md mx-auto">
+          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-16 max-w-md mx-auto">
             <Calendar className="w-20 h-20 text-white/20 mx-auto mb-6" />
             <p className="text-white/60 text-xl font-light">Rezervasyon bulunamadı</p>
           </div>
@@ -303,11 +303,11 @@ function Reservations() {
 
       {/* Detail Modal */}
       {showDetailModal && selectedReservation && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="relative w-full max-w-2xl">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/20 shadow-2xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-green-500/20 border-b border-white/10 p-6">
+              <div className="sticky top-0 z-10 relative overflow-hidden bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-green-500/20 border-b border-white/10 p-4 sm:p-6 backdrop-blur-2xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-3xl" />
                 <div className="relative flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -326,7 +326,7 @@ function Reservations() {
               </div>
 
               {/* Body */}
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-6">
                 {/* Customer Info */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
