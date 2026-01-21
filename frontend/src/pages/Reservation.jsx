@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Calendar, Clock, Users, Phone, Mail, User, MessageSquare, ShoppingCart, X, Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import api from '../services/api'
 
 const WHATSAPP_NUMBER = '905524553131' // +90 552 455 31 31
 
@@ -9,6 +10,7 @@ const Reservation = () => {
   const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, clearCart } = useCart()
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     date: '',
     time: '',
@@ -16,6 +18,8 @@ const Reservation = () => {
     notes: ''
   })
   const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' })
 
   const timeSlots = [
     '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
@@ -45,6 +49,9 @@ const Reservation = () => {
     if (!formData.name.trim()) {
       newErrors.name = 'İsim gerekli'
     }
+    if (!formData.email.trim()) {
+      newErrors.email = 'E-posta gerekli'
+    }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Telefon gerekli'
     }
@@ -62,6 +69,7 @@ const Reservation = () => {
   const createWhatsAppMessage = () => {
     let message = `🍽️ *Seyirtepe Restaurant Rezervasyon*\n\n`
     message += `👤 *İsim:* ${formData.name}\n`
+    message += `📧 *E-posta:* ${formData.email}\n`
     message += `📞 *Telefon:* ${formData.phone}\n`
     message += `📅 *Tarih:* ${formData.date}\n`
     message += `🕐 *Saat:* ${formData.time}\n`
@@ -82,33 +90,84 @@ const Reservation = () => {
     return message
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!validateForm()) {
       return
     }
 
-    const message = createWhatsAppMessage()
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
-    
-    // WhatsApp'a yönlendir
-    window.open(whatsappUrl, '_blank')
-    
-    // Sepeti temizle
-    if (cartItems.length > 0) {
-      clearCart()
+    setSubmitting(true)
+    setSubmitMessage({ type: '', text: '' })
+
+    try {
+      const guestsValue = formData.guests === '8+' ? 8 : parseInt(formData.guests, 10)
+      const reservationDateTime = new Date(`${formData.date}T${formData.time}:00`)
+
+      const reservationPayload = {
+        customer_name: formData.name.trim(),
+        customer_email: formData.email.trim(),
+        customer_phone: formData.phone.trim(),
+        date: reservationDateTime.toISOString(),
+        guests: Number.isFinite(guestsValue) ? guestsValue : 2,
+        special_requests: formData.notes?.trim() || null
+      }
+
+      const createdReservation = await api.post('/reservations/', reservationPayload)
+      const reservationId = createdReservation?.data?.id
+
+      if (cartItems.length > 0) {
+        const orderPayload = {
+          customer_name: formData.name.trim(),
+          customer_phone: formData.phone.trim(),
+          customer_address: null,
+          items: cartItems.map((item) => ({
+            product_id: Number(item.id) || 0,
+            product_name: item.name || 'Ürün',
+            quantity: Number(item.quantity) || 1,
+            price: Number(item.price) || 0
+          })),
+          total_amount: Number(getTotalPrice()) || 0,
+          notes: [
+            reservationId ? `Rezervasyon ID: ${reservationId}` : null,
+            `Rezervasyon: ${formData.date} ${formData.time}`,
+            `Kişi: ${formData.guests}`,
+            formData.notes?.trim() ? `Not: ${formData.notes.trim()}` : null
+          ].filter(Boolean).join('\n')
+        }
+
+        await api.post('/orders/', orderPayload)
+      }
+
+      setSubmitMessage({
+        type: 'success',
+        text: cartItems.length > 0
+          ? 'Rezervasyonunuz ve siparişiniz alındı. Admin panelinden görüntülenebilir.'
+          : 'Rezervasyonunuz alındı. Admin panelinden görüntülenebilir.'
+      })
+
+      if (cartItems.length > 0) {
+        clearCart()
+      }
+
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        date: '',
+        time: '',
+        guests: '2',
+        notes: ''
+      })
+    } catch (error) {
+      console.error('Reservation submit failed:', error)
+      setSubmitMessage({
+        type: 'error',
+        text: 'Rezervasyon gönderilemedi. Lütfen tekrar deneyin. İsterseniz WhatsApp ile de gönderebilirsiniz.'
+      })
+    } finally {
+      setSubmitting(false)
     }
-    
-    // Formu temizle
-    setFormData({
-      name: '',
-      phone: '',
-      date: '',
-      time: '',
-      guests: '2',
-      notes: ''
-    })
   }
 
   // Bugünden önceki tarihleri disable et
@@ -192,6 +251,16 @@ const Reservation = () => {
               )}
 
               <form onSubmit={handleSubmit} className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
+                {submitMessage.text && (
+                  <div className={`mb-6 rounded-xl p-4 border ${
+                    submitMessage.type === 'success'
+                      ? 'bg-green-500/10 border-green-500/30 text-green-200'
+                      : 'bg-red-500/10 border-red-500/30 text-red-200'
+                  }`}>
+                    {submitMessage.text}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {/* Name */}
                   <div className="md:col-span-2">
@@ -232,6 +301,27 @@ const Reservation = () => {
                     />
                     {errors.phone && (
                       <p className="text-red-400 text-sm mt-1">{errors.phone}</p>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div className="md:col-span-2">
+                    <label className="block text-white font-medium mb-2">
+                      <Mail className="w-4 h-4 inline mr-2" />
+                      E-posta *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                        errors.email ? 'border-red-500' : 'border-white/10'
+                      } text-white placeholder-white/40 focus:outline-none focus:border-amber-500 transition-colors`}
+                      placeholder="ornek@mail.com"
+                    />
+                    {errors.email && (
+                      <p className="text-red-400 text-sm mt-1">{errors.email}</p>
                     )}
                   </div>
 
@@ -322,12 +412,25 @@ const Reservation = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  disabled={submitting}
                   className="w-full mt-8 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl shadow-green-500/30 flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                   </svg>
-                  WhatsApp ile Rezervasyon Yap
+                  {submitting ? 'Gönderiliyor...' : 'Rezervasyonu Gönder'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const message = createWhatsAppMessage()
+                    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+                    window.open(whatsappUrl, '_blank')
+                  }}
+                  className="w-full mt-3 px-8 py-4 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/15 transition-all border border-white/15 flex items-center justify-center gap-2"
+                >
+                  WhatsApp ile Gönder (Opsiyonel)
                 </button>
               </form>
             </div>

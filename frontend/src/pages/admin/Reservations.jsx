@@ -18,10 +18,12 @@ function Reservations() {
   const fetchReservations = async () => {
     try {
       const response = await api.get('/reservations');
-      setReservations(response.data);
+      const data = response.data;
+      setReservations(Array.isArray(data) ? data : []);
     } catch (error) {
       showMessage('error', 'Rezervasyonlar yüklenirken hata oluştu');
       console.error('Error fetching reservations:', error);
+      setReservations([]);
     } finally {
       setLoading(false);
     }
@@ -66,9 +68,11 @@ function Reservations() {
 
   const filteredReservations = reservations.filter(reservation => {
     const matchesStatus = filterStatus === 'all' || reservation.status === filterStatus;
-    const matchesSearch = reservation.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reservation.customer_phone.includes(searchTerm) ||
-                         reservation.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const customerName = String(reservation.customer_name || '').toLowerCase();
+    const customerPhone = String(reservation.customer_phone || '');
+    const customerEmail = String(reservation.customer_email || '').toLowerCase();
+    const matchesSearch = customerName.includes(term) || customerPhone.includes(searchTerm) || customerEmail.includes(term);
     return matchesStatus && matchesSearch;
   });
 
