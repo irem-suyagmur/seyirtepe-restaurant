@@ -29,6 +29,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Safety net for production: accept both www and non-www for the main domain
+    allow_origin_regex=r"^https?://(www\.)?seyirteperestaurantcafe\.com$",
 )
 
 # Veritabanını başlat

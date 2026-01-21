@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 from typing import List, Optional
 from pydantic import field_validator, model_validator
 from urllib.parse import urlparse
+import json
 
 
 class Settings(BaseSettings):
@@ -29,11 +30,22 @@ class Settings(BaseSettings):
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def _parse_allowed_origins(cls, v):
-        # pydantic-settings may pass env vars as a single comma-separated string.
+        # pydantic-settings may pass env vars as:
+        # - a single comma-separated string
+        # - a JSON list string (common on some hosts)
         if v is None:
             return v
         if isinstance(v, str):
-            return [part.strip() for part in v.split(",") if part.strip()]
+            raw = v.strip()
+            if raw.startswith("[") and raw.endswith("]"):
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+                except Exception:
+                    # fall back to comma split
+                    pass
+            return [part.strip() for part in raw.split(",") if part.strip()]
         return v
     
     # Database (SQLite)
@@ -54,9 +66,17 @@ class Settings(BaseSettings):
     def _validate_security(self):
         env = (self.ENVIRONMENT or "development").lower()
 
+        # Always include the production public origins even if env overrides are incomplete.
+        required_origins = {
+            "https://seyirteperestaurantcafe.com",
+            "https://www.seyirteperestaurantcafe.com",
+            "http://seyirteperestaurantcafe.com",
+            "http://www.seyirteperestaurantcafe.com",
+        }
+
         # Normalize/expand allowed origins (avoid subtle www vs non-www CORS failures)
         normalized: List[str] = []
-        for origin in (self.ALLOWED_ORIGINS or []):
+        for origin in list(self.ALLOWED_ORIGINS or []) + list(required_origins):
             if not origin:
                 continue
             normalized.append(str(origin).rstrip("/"))
