@@ -8,12 +8,16 @@ from app.schemas.product import Product, ProductCreate, ProductUpdate, ProductWi
 from app.services.product_service import ProductService
 from app.services.category_service import CategoryService
 from app.config import settings
+from app.security import require_admin
 
 router = APIRouter()
 
 
 @router.post("/upload-image")
-async def upload_product_image(file: UploadFile = File(...)):
+async def upload_product_image(
+    file: UploadFile = File(...),
+    _: dict = Depends(require_admin),
+):
     """Ürün görseli yükle ve erişilebilir URL döndür."""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
@@ -101,7 +105,11 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=Product, status_code=status.HTTP_201_CREATED)
-def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+def create_product(
+    product: ProductCreate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Yeni ürün oluştur"""
     # Kategori var mı kontrol et
     category_service = CategoryService(db)
@@ -120,7 +128,8 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 def update_product(
     product_id: int,
     product_update: ProductUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Ürün güncelle"""
     # Eğer category_id güncelleniyorsa, kategori var mı kontrol et
@@ -144,7 +153,11 @@ def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Ürün sil"""
     service = ProductService(db)
     success = service.delete(product_id)

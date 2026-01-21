@@ -6,6 +6,7 @@ from app.database import get_db
 from app.schemas.reservation import Reservation, ReservationCreate
 from app.services.reservation_service import ReservationService
 from app.models.reservation import ReservationStatus
+from app.security import require_admin
 
 router = APIRouter()
 
@@ -28,7 +29,8 @@ def create_reservation(
 def get_reservations(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Rezervasyonları listele"""
     service = ReservationService(db)
@@ -38,7 +40,8 @@ def get_reservations(
 @router.get("/{reservation_id}", response_model=Reservation)
 def get_reservation(
     reservation_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Belirli bir rezervasyonu getir"""
     service = ReservationService(db)
@@ -52,7 +55,8 @@ def get_reservation(
 def update_reservation_status(
     reservation_id: int,
     status_update: ReservationStatusUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Rezervasyon durumunu güncelle"""
     service = ReservationService(db)

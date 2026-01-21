@@ -7,10 +7,15 @@ from app.config import settings
 from app.database import init_db
 import os
 
+is_production = (getattr(settings, "ENVIRONMENT", "development") or "development").lower() == "production"
+
 app = FastAPI(
     title="Seyirtepe Restaurant Cafe API",
     description="Modern restaurant management API with reservation system",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url=None if is_production else "/docs",
+    redoc_url=None if is_production else "/redoc",
+    openapi_url=None if is_production else "/openapi.json",
 )
 
 # Uploads klasörünü oluştur ve statik servis et
@@ -51,7 +56,7 @@ def root():
     return {
         "message": "Seyirtepe Restaurant Cafe API",
         "status": "active",
-        "docs": "/docs"
+        "docs": None if is_production else "/docs"
     }
 
 @app.get("/health")

@@ -5,6 +5,7 @@ from app.database import get_db
 from app.schemas.order import Order, OrderCreate, OrderStatusUpdate
 from app.services.order_service import OrderService
 from app.models.order import OrderStatus
+from app.security import require_admin
 
 router = APIRouter()
 
@@ -13,7 +14,8 @@ router = APIRouter()
 def get_orders(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Tüm siparişleri listele"""
     service = OrderService(db)
@@ -21,7 +23,11 @@ def get_orders(
 
 
 @router.get("/{order_id}", response_model=Order)
-def get_order(order_id: int, db: Session = Depends(get_db)):
+def get_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Belirli bir siparişi getir"""
     service = OrderService(db)
     order = service.get_by_id(order_id)
@@ -44,7 +50,8 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
 def update_order_status(
     order_id: int,
     status_update: OrderStatusUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Sipariş durumunu güncelle"""
     service = OrderService(db)
@@ -67,7 +74,11 @@ def update_order_status(
 
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_order(order_id: int, db: Session = Depends(get_db)):
+def delete_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Sipariş sil"""
     service = OrderService(db)
     success = service.delete(order_id)

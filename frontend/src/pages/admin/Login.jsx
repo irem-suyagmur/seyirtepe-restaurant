@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { Lock, Mail, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import api from '../../services/api'
 
 const AdminLogin = () => {
   const navigate = useNavigate()
@@ -56,21 +57,27 @@ const AdminLogin = () => {
     setIsSubmitting(true)
 
     try {
-      // TODO: Backend admin login API entegrasyonu
-      // Şimdilik mock authentication
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Mock credentials
-      if (formData.email === 'admin@seyirtepe.com' && formData.password === 'admin123') {
-        localStorage.setItem('adminToken', 'mock-token-123')
-        navigate('/admin/dashboard')
-      } else {
-        setErrors({ password: 'E-posta veya şifre hatalı' })
+      const res = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password,
+      })
+
+      const token = res?.data?.access_token
+      if (!token) {
+        setErrors({ password: 'Giriş başarısız (token alınamadı)' })
+        return
       }
 
+      localStorage.setItem('adminToken', token)
+      navigate('/admin/dashboard')
+
     } catch (error) {
-      console.error('Login error:', error)
-      setErrors({ password: 'Giriş yapılırken bir hata oluştu' })
+      const status = error?.response?.status
+      if (status === 401) {
+        setErrors({ password: 'E-posta veya şifre hatalı' })
+      } else {
+        setErrors({ password: 'Giriş yapılırken bir hata oluştu' })
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -205,7 +212,7 @@ const AdminLogin = () => {
             {/* Demo Credentials Info */}
             <div className="mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
               <p className="text-xs sm:text-sm text-amber-200 text-center">
-                <strong>Demo Giriş:</strong> admin@seyirtepe.com / admin123
+                <strong>Not:</strong> Admin giriş bilgileri artık backend üzerinden doğrulanıyor.
               </p>
             </div>
           </div>

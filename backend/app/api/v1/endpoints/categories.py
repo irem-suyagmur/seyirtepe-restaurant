@@ -6,6 +6,7 @@ from app.schemas.category import Category, CategoryCreate, CategoryUpdate
 from app.schemas.combined import CategoryWithProducts
 from app.services.category_service import CategoryService
 from app.models.category import Category as CategoryModel
+from app.security import require_admin
 
 router = APIRouter()
 
@@ -61,7 +62,11 @@ def get_category_with_products(category_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED)
-def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
+def create_category(
+    category: CategoryCreate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Yeni kategori oluştur"""
     service = CategoryService(db)
     
@@ -80,7 +85,8 @@ def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
 def update_category(
     category_id: int,
     category_update: CategoryUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
 ):
     """Kategori güncelle"""
     service = CategoryService(db)
@@ -94,7 +100,11 @@ def update_category(
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_category(category_id: int, db: Session = Depends(get_db)):
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
     """Kategori sil"""
     service = CategoryService(db)
     success = service.delete(category_id)

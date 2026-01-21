@@ -24,7 +24,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -42,6 +42,7 @@ api.interceptors.response.use(
     // Handle errors globally
     if (error.response?.status === 401) {
       // Handle unauthorized
+      localStorage.removeItem('adminToken')
       localStorage.removeItem('token')
     }
     return Promise.reject(error)
