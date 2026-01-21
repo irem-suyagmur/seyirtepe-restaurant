@@ -90,13 +90,7 @@ const Reservation = () => {
     return message
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
+  const submitReservationAndMaybeOrder = async ({ openWhatsApp = false } = {}) => {
     setSubmitting(true)
     setSubmitMessage({ type: '', text: '' })
 
@@ -139,6 +133,12 @@ const Reservation = () => {
         await api.post('/orders/', orderPayload)
       }
 
+      if (openWhatsApp) {
+        const message = createWhatsAppMessage()
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+        window.open(whatsappUrl, '_blank')
+      }
+
       setSubmitMessage({
         type: 'success',
         text: cartItems.length > 0
@@ -168,6 +168,12 @@ const Reservation = () => {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!validateForm()) return
+    await submitReservationAndMaybeOrder({ openWhatsApp: false })
   }
 
   // Bugünden önceki tarihleri disable et
@@ -424,13 +430,13 @@ const Reservation = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    const message = createWhatsAppMessage()
-                    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
-                    window.open(whatsappUrl, '_blank')
+                    if (submitting) return
+                    if (!validateForm()) return
+                    submitReservationAndMaybeOrder({ openWhatsApp: true })
                   }}
                   className="w-full mt-3 px-8 py-4 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/15 transition-all border border-white/15 flex items-center justify-center gap-2"
                 >
-                  WhatsApp ile Gönder (Opsiyonel)
+                  WhatsApp ile Gönder + Admin'e Kaydet
                 </button>
               </form>
             </div>
