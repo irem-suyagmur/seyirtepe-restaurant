@@ -4,7 +4,6 @@ import {
   TrendingUp, 
   ShoppingCart, 
   Calendar, 
-  Users, 
   DollarSign,
   Package,
   Clock,
@@ -12,89 +11,121 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react'
+import api from '../../services/api'
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
     totalReservations: 0,
-    totalCustomers: 0,
+    totalProducts: 0,
     todayRevenue: 0,
     todayOrders: 0,
-    pendingOrders: 0,
-    completedOrders: 0
+    activeOrders: 0,
+    deliveredOrders: 0
   })
 
   const [recentOrders, setRecentOrders] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // TODO: Backend API'den gerçek verileri çek
-    // Şimdilik mock data
-    setStats({
-      totalRevenue: 45750.00,
-      totalOrders: 328,
-      totalReservations: 156,
-      totalCustomers: 892,
-      todayRevenue: 3250.00,
-      todayOrders: 24,
-      pendingOrders: 5,
-      completedOrders: 323
-    })
+    const load = async () => {
+      try {
+        const [ordersRes, reservationsRes, productsRes] = await Promise.all([
+          api.get('/orders'),
+          api.get('/reservations'),
+          api.get('/products'),
+        ])
 
-    setRecentOrders([
-      {
-        id: 1,
-        customer: 'Ahmet Yılmaz',
-        phone: '0555 123 45 67',
-        items: ['Menemen x1', 'Serpme Kahvaltı x2'],
-        total: 325.00,
-        status: 'completed',
-        date: '2026-01-19 14:30'
-      },
-      {
-        id: 2,
-        customer: 'Ayşe Kaya',
-        phone: '0532 987 65 43',
-        items: ['Sucuklu Yumurta x1', 'Çay x2'],
-        total: 150.00,
-        status: 'pending',
-        date: '2026-01-19 14:15'
-      },
-      {
-        id: 3,
-        customer: 'Mehmet Demir',
-        phone: '0544 765 43 21',
-        items: ['Kahvaltı Tabağı x3'],
-        total: 450.00,
-        status: 'completed',
-        date: '2026-01-19 13:45'
-      },
-      {
-        id: 4,
-        customer: 'Fatma Şahin',
-        phone: '0505 456 78 90',
-        items: ['Omlet x2', 'Türk Kahvesi x2'],
-        total: 180.00,
-        status: 'pending',
-        date: '2026-01-19 13:20'
-      },
-      {
-        id: 5,
-        customer: 'Ali Öztürk',
-        phone: '0533 234 56 78',
-        items: ['Gözleme x4', 'Ayran x4'],
-        total: 280.00,
-        status: 'cancelled',
-        date: '2026-01-19 12:50'
+        const orders = Array.isArray(ordersRes.data) ? ordersRes.data : []
+        const reservations = Array.isArray(reservationsRes.data) ? reservationsRes.data : []
+        const products = Array.isArray(productsRes.data) ? productsRes.data : []
+
+        const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+        const totalOrders = orders.length
+        const totalReservations = reservations.length
+        const totalProducts = products.length
+
+        const now = new Date()
+        const isSameDay = (a, b) =>
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate()
+
+        const todayOrdersList = orders.filter((o) => {
+          const createdAt = o?.created_at ? new Date(o.created_at) : null
+          return createdAt && !Number.isNaN(createdAt.getTime()) && isSameDay(createdAt, now)
+        })
+
+        const todayRevenue = todayOrdersList.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+        const todayOrders = todayOrdersList.length
+
+        const isDelivered = (status) => String(status || '').toLowerCase() === 'delivered'
+        const isCancelled = (status) => String(status || '').toLowerCase() === 'cancelled'
+        const deliveredOrders = orders.filter((o) => isDelivered(o.status)).length
+        const activeOrders = orders.filter((o) => !isDelivered(o.status) && !isCancelled(o.status)).length
+
+        setStats({
+          totalRevenue,
+          totalOrders,
+          totalReservations,
+          totalProducts,
+          todayRevenue,
+          todayOrders,
+          activeOrders,
+          deliveredOrders,
+        })
+
+        const formatOrderDate = (value) => {
+          const d = value ? new Date(value) : null
+          if (!d || Number.isNaN(d.getTime())) return ''
+          return d.toLocaleString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        }
+
+        const sorted = [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        setRecentOrders(
+          sorted.slice(0, 5).map((o) => ({
+            id: o.id,
+            customer: o.customer_name,
+            phone: o.customer_phone,
+            items: Array.isArray(o.items)
+              ? o.items.map((i) => `${i.product_name} x${i.quantity}`)
+              : [],
+            total: Number(o.total_amount) || 0,
+            status: String(o.status || '').toLowerCase(),
+            date: formatOrderDate(o.created_at),
+          }))
+        )
+      } catch (e) {
+        // API sorunlarında dashboard'u 0 / boş göster
+        setStats({
+          totalRevenue: 0,
+          totalOrders: 0,
+          totalReservations: 0,
+          totalProducts: 0,
+          todayRevenue: 0,
+          todayOrders: 0,
+          activeOrders: 0,
+          deliveredOrders: 0,
+        })
+        setRecentOrders([])
+        console.error('Dashboard load error:', e)
+      } finally {
+        setLoading(false)
       }
-    ])
+    }
+
+    load()
   }, [])
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'completed':
+      case 'delivered':
         return 'bg-green-500/20 text-green-400 border-green-500/30'
       case 'pending':
+      case 'confirmed':
+      case 'preparing':
+      case 'ready':
         return 'bg-amber-500/20 text-amber-400 border-amber-500/30'
       case 'cancelled':
         return 'bg-red-500/20 text-red-400 border-red-500/30'
@@ -105,9 +136,12 @@ const Dashboard = () => {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'completed':
+      case 'delivered':
         return <CheckCircle className="w-4 h-4" />
       case 'pending':
+      case 'confirmed':
+      case 'preparing':
+      case 'ready':
         return <Clock className="w-4 h-4" />
       case 'cancelled':
         return <XCircle className="w-4 h-4" />
@@ -118,10 +152,16 @@ const Dashboard = () => {
 
   const getStatusText = (status) => {
     switch(status) {
-      case 'completed':
-        return 'Tamamlandı'
       case 'pending':
         return 'Bekliyor'
+      case 'confirmed':
+        return 'Onaylandı'
+      case 'preparing':
+        return 'Hazırlanıyor'
+      case 'ready':
+        return 'Hazır'
+      case 'delivered':
+        return 'Teslim'
       case 'cancelled':
         return 'İptal'
       default:
@@ -133,8 +173,6 @@ const Dashboard = () => {
     {
       title: 'Toplam Ciro',
       value: `₺${stats.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-      change: '+12.5%',
-      trend: 'up',
       icon: DollarSign,
       color: 'from-green-500 to-emerald-600',
       bgColor: 'bg-green-500/10',
@@ -143,8 +181,6 @@ const Dashboard = () => {
     {
       title: 'Toplam Sipariş',
       value: stats.totalOrders.toString(),
-      change: '+8.2%',
-      trend: 'up',
       icon: ShoppingCart,
       color: 'from-amber-500 to-orange-600',
       bgColor: 'bg-amber-500/10',
@@ -153,19 +189,15 @@ const Dashboard = () => {
     {
       title: 'Rezervasyonlar',
       value: stats.totalReservations.toString(),
-      change: '+15.3%',
-      trend: 'up',
       icon: Calendar,
       color: 'from-blue-500 to-cyan-600',
       bgColor: 'bg-blue-500/10',
       borderColor: 'border-blue-500/30'
     },
     {
-      title: 'Toplam Müşteri',
-      value: stats.totalCustomers.toString(),
-      change: '+6.8%',
-      trend: 'up',
-      icon: Users,
+      title: 'Ürünler',
+      value: stats.totalProducts.toString(),
+      icon: Package,
       color: 'from-purple-500 to-pink-600',
       bgColor: 'bg-purple-500/10',
       borderColor: 'border-purple-500/30'
@@ -186,14 +218,14 @@ const Dashboard = () => {
       color: 'text-amber-400'
     },
     {
-      title: 'Bekleyen',
-      value: stats.pendingOrders.toString(),
+      title: 'Aktif',
+      value: stats.activeOrders.toString(),
       icon: Clock,
       color: 'text-amber-400'
     },
     {
-      title: 'Tamamlanan',
-      value: stats.completedOrders.toString(),
+      title: 'Teslim',
+      value: stats.deliveredOrders.toString(),
       icon: CheckCircle,
       color: 'text-green-400'
     }
@@ -229,10 +261,9 @@ const Dashboard = () => {
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-400 text-xs sm:text-sm font-medium">
-                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {stat.change}
-                  </div>
+                  {loading ? (
+                    <div className="text-xs sm:text-sm text-white/40">Yükleniyor…</div>
+                  ) : null}
                 </div>
                 <h3 className="text-white/70 text-xs sm:text-sm mb-1">{stat.title}</h3>
                 <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{stat.value}</p>
@@ -324,6 +355,13 @@ const Dashboard = () => {
                         </td>
                       </tr>
                     ))}
+                    {!loading && recentOrders.length === 0 ? (
+                      <tr>
+                        <td className="px-4 sm:px-6 py-6 text-sm text-white/60" colSpan={5}>
+                          Henüz sipariş yok.
+                        </td>
+                      </tr>
+                    ) : null}
                   </tbody>
                 </table>
               </div>
