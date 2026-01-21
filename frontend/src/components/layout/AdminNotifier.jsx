@@ -3,7 +3,7 @@ import { Bell, Volume2, VolumeX, Play } from 'lucide-react'
 import api from '../../services/api'
 
 const POLL_INTERVAL_MS = 8000
-const ALARM_BEEPS = 6
+const ALARM_BEEPS = 36
 
 const safeMaxId = (list) => {
   if (!Array.isArray(list) || list.length === 0) return 0
@@ -90,20 +90,23 @@ export default function AdminNotifier() {
     }
 
     const now = ctx.currentTime
-    const beepDuration = 0.12
-    const gap = 0.08
-    const baseFreq = 880
+    const beepDuration = 0.18
+    const gap = 0.06
+    const baseFreq = 920
 
     for (let i = 0; i < ALARM_BEEPS; i += 1) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
 
       osc.type = 'square'
-      osc.frequency.setValueAtTime(baseFreq + (i % 2 === 0 ? 0 : 220), now)
-
       const startAt = now + i * (beepDuration + gap)
+      const freqA = baseFreq + (i % 2 === 0 ? 0 : 260)
+      const freqB = freqA + 120
+      osc.frequency.setValueAtTime(freqA, startAt)
+      osc.frequency.linearRampToValueAtTime(freqB, startAt + Math.max(0.01, beepDuration - 0.03))
+
       gain.gain.setValueAtTime(0.0001, startAt)
-      gain.gain.exponentialRampToValueAtTime(0.35, startAt + 0.01)
+      gain.gain.exponentialRampToValueAtTime(0.42, startAt + 0.01)
       gain.gain.exponentialRampToValueAtTime(0.0001, startAt + beepDuration)
 
       osc.connect(gain)
