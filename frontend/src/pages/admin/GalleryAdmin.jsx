@@ -12,6 +12,7 @@ const GalleryAdmin = () => {
   const [imageToDelete, setImageToDelete] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [message, setMessage] = useState({ type: '', text: '' })
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,6 +33,11 @@ const GalleryAdmin = () => {
   useEffect(() => {
     fetchImages()
   }, [])
+
+  const showMessage = (type, text) => {
+    setMessage({ type, text })
+    setTimeout(() => setMessage({ type: '', text: '' }), 3000)
+  }
 
   const fetchImages = async () => {
     try {
@@ -60,7 +66,7 @@ const GalleryAdmin = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert('Lütfen bir resim seçin')
+      showMessage('error', 'Lütfen bir resim seçin')
       return
     }
 
@@ -91,13 +97,13 @@ const GalleryAdmin = () => {
         }
       )
 
-      alert('Resim başarıyla yüklendi!')
+      showMessage('success', 'Resim başarıyla yüklendi!')
       setShowUploadModal(false)
       resetForm()
       fetchImages()
     } catch (error) {
       console.error('Yükleme hatası:', error)
-      alert('Resim yüklenirken hata oluştu')
+      showMessage('error', 'Resim yüklenirken hata oluştu')
     } finally {
       setUploading(false)
     }
@@ -108,13 +114,13 @@ const GalleryAdmin = () => {
 
     try {
       await api.put(`/gallery/${selectedImage.id}`, formData)
-      alert('Resim başarıyla güncellendi!')
+      showMessage('success', 'Resim başarıyla güncellendi!')
       setShowEditModal(false)
       resetForm()
       fetchImages()
     } catch (error) {
       console.error('Güncelleme hatası:', error)
-      alert('Resim güncellenirken hata oluştu')
+      showMessage('error', 'Resim güncellenirken hata oluştu')
     }
   }
 
@@ -129,13 +135,13 @@ const GalleryAdmin = () => {
     try {
       setDeleting(true)
       await api.delete(`/gallery/${imageToDelete.id}`)
-      alert('Resim başarıyla silindi!')
+      showMessage('success', 'Resim başarıyla silindi!')
       setShowDeleteModal(false)
       setImageToDelete(null)
       fetchImages()
     } catch (error) {
       console.error('Silme hatası:', error)
-      alert('Resim silinirken hata oluştu')
+      showMessage('error', 'Resim silinirken hata oluştu')
     } finally {
       setDeleting(false)
     }
@@ -178,6 +184,20 @@ const GalleryAdmin = () => {
 
   return (
     <div className="space-y-6">
+      {/* Message Toast */}
+      {message.text && (
+        <div className={`relative overflow-hidden rounded-2xl p-4 ${
+          message.type === 'success' 
+            ? 'bg-green-500/10 border border-green-500/30 text-green-400' 
+            : 'bg-red-500/10 border border-red-500/30 text-red-400'
+        } backdrop-blur-xl`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-2 h-2 rounded-full ${message.type === 'success' ? 'bg-green-400' : 'bg-red-400'}`} />
+            {message.text}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
