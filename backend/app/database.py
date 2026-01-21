@@ -31,4 +31,7 @@ def get_db() -> Session:
 
 def init_db():
     """Veritabanını başlat ve tabloları oluştur"""
+    # Ensure all models are imported so SQLAlchemy registers tables/enums
+    # before running create_all (prevents missing-table issues on fresh DBs).
+    from app import models  # noqa: F401
     Base.metadata.create_all(bind=engine)

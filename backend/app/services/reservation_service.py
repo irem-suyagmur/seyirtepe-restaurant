@@ -11,7 +11,8 @@ class ReservationService:
     
     def create_reservation(self, reservation: ReservationCreate) -> ReservationModel:
         """Yeni rezervasyon oluştur"""
-        data = reservation.dict()
+        # Pydantic v2: prefer model_dump (dict() is deprecated but may still exist)
+        data = reservation.model_dump()
         # Email is optional in the public reservation flow.
         # Store None instead of empty string (cleaner for optional fields).
         if not data.get("customer_email") or not str(data.get("customer_email")).strip():

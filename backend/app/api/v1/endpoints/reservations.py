@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
+import logging
 from app.database import get_db
 from app.schemas.reservation import Reservation, ReservationCreate
 from app.services.reservation_service import ReservationService
@@ -9,6 +10,7 @@ from app.models.reservation import ReservationStatus
 from app.security import require_admin
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class ReservationStatusUpdate(BaseModel):
@@ -22,7 +24,16 @@ def create_reservation(
 ):
     """Yeni rezervasyon oluştur"""
     service = ReservationService(db)
-    return service.create_reservation(reservation)
+    # Catch unexpected errors so we return a proper JSON response that still
+    # passes through FastAPI/Starlette exception handling (avoids "CORS" masking
+    # caused by raw 500 responses generated outside CORS middleware).
+    try:
+        return service.create_reservation(reservation)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to create reservation")
+        raise HTTPException(status_code=500, detail="Reservation could not be created") from exc
 
 
 @router.get("/", response_model=List[Reservation])
