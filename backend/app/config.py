@@ -13,6 +13,10 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://localhost:5174",
         "https://seyirtepe-frontend.onrender.com",
+        "https://seyirteperestaurantcafe.com",
+        "https://www.seyirteperestaurantcafe.com",
+        "http://seyirteperestaurantcafe.com",
+        "http://www.seyirteperestaurantcafe.com",
         "https://decimus.maxicloud.online",
         "http://decimus.maxicloud.online"
     ]
