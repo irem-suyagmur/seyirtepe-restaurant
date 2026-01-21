@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   ChefHat,
-  Globe
+  Globe,
+  Image
 } from 'lucide-react'
 import AdminNotifier from './AdminNotifier'
 
@@ -39,6 +40,7 @@ const AdminLayout = () => {
     { icon: Calendar, label: 'Rezervasyonlar', path: '/admin/reservations' },
     { icon: Package, label: 'Ürünler', path: '/admin/products' },
     { icon: MenuIcon, label: 'Kategoriler', path: '/admin/categories' },
+    { icon: Image, label: 'Galeri', path: '/admin/gallery' },
     { icon: Users, label: 'Müşteriler', path: '/admin/customers' },
     { icon: Globe, label: 'Site Ayarları', path: '/admin/settings' }
   ]

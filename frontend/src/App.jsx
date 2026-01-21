@@ -20,6 +20,7 @@ const Products = lazy(() => import('./pages/admin/Products'))
 const Categories = lazy(() => import('./pages/admin/Categories'))
 const Reservations = lazy(() => import('./pages/admin/Reservations'))
 const Orders = lazy(() => import('./pages/admin/Orders'))
+const GalleryAdmin = lazy(() => import('./pages/admin/GalleryAdmin'))
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-black">
@@ -49,6 +50,7 @@ function App() {
               <Route path="categories" element={<Categories />} />
               <Route path="reservations" element={<Reservations />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="gallery" element={<GalleryAdmin />} />
             </Route>
             
             {/* Public Routes - With Layout */}

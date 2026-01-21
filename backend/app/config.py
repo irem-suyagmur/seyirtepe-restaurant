@@ -36,7 +36,8 @@ class Settings(BaseSettings):
     # Admin Auth
     ADMIN_EMAIL: str = "admin@seyirtepe.com"
     ADMIN_PASSWORD: str = ""  # set via env in production
-    ADMIN_PASSWORD_HASH: Optional[str] = None  # bcrypt hash preferred
+    # Fixed strong password (hash). You can still override via env.
+    ADMIN_PASSWORD_HASH: Optional[str] = "$pbkdf2-sha256$29000$AaA0xvj/H4MQIoRQKsU4Bw$tkMw/lVkGoMvzN1Q/QiHcy/Zx2UNU9mruZH3btApY6k"
 
     @model_validator(mode="after")
     def _validate_security(self):
