@@ -43,6 +43,9 @@ def on_startup():
 # API router
 app.include_router(api_router, prefix="/api/v1")
 
+# Backward-compatible routes (some frontend builds call without /api/v1)
+app.include_router(api_router, include_in_schema=False)
+
 @app.get("/")
 def root():
     return {
