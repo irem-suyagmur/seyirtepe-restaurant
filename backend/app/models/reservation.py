@@ -21,6 +21,15 @@ class Reservation(Base):
     date = Column(DateTime, nullable=False)
     guests = Column(Integer, nullable=False)
     special_requests = Column(Text)
-    status = Column(Enum(ReservationStatus), default=ReservationStatus.PENDING)
+    # Store enum VALUES ("pending") rather than NAMES ("PENDING") to avoid
+    # Postgres enum mismatches when the DB was created/migrated with lowercase values.
+    status = Column(
+        Enum(
+            ReservationStatus,
+            name="reservationstatus",
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+        ),
+        default=ReservationStatus.PENDING,
+    )
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
