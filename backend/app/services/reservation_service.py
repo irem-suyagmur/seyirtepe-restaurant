@@ -25,7 +25,11 @@ class ReservationService:
 
         db_reservation = ReservationModel(**data)
         self.db.add(db_reservation)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
         self.db.refresh(db_reservation)
         return db_reservation
     

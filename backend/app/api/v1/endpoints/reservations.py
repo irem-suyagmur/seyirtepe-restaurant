@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
@@ -28,7 +29,12 @@ def create_reservation(
     # passes through FastAPI/Starlette exception handling (avoids "CORS" masking
     # caused by raw 500 responses generated outside CORS middleware).
     try:
-        return service.create_reservation(reservation)
+        created = service.create_reservation(reservation)
+        # Return an explicit JSON response to avoid rare response_model
+        # serialization/validation issues bubbling up as raw 500s (which then
+        # look like CORS failures in the browser).
+        payload = Reservation.model_validate(created).model_dump(mode="json")
+        return JSONResponse(content=payload)
     except HTTPException:
         raise
     except Exception as exc:
