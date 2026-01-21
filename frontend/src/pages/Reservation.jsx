@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Calendar, Clock, Users, Phone, Mail, User, MessageSquare, ShoppingCart, X, Plus, Minus } from 'lucide-react'
+import { Calendar, Clock, Users, Phone, User, MessageSquare, ShoppingCart, X, Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import api from '../services/api'
 
@@ -8,7 +8,6 @@ const Reservation = () => {
   const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, clearCart } = useCart()
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
     date: '',
     time: '',
@@ -47,9 +46,6 @@ const Reservation = () => {
     if (!formData.name.trim()) {
       newErrors.name = 'İsim gerekli'
     }
-    if (!formData.email.trim()) {
-      newErrors.email = 'E-posta gerekli'
-    }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Telefon gerekli'
     }
@@ -74,7 +70,7 @@ const Reservation = () => {
 
       const reservationPayload = {
         customer_name: formData.name.trim(),
-        customer_email: formData.email.trim(),
+        customer_email: null,
         customer_phone: formData.phone.trim(),
         date: reservationDateTime.toISOString(),
         guests: Number.isFinite(guestsValue) ? guestsValue : 2,
@@ -120,7 +116,6 @@ const Reservation = () => {
 
       setFormData({
         name: '',
-        email: '',
         phone: '',
         date: '',
         time: '',
@@ -275,27 +270,6 @@ const Reservation = () => {
                     />
                     {errors.phone && (
                       <p className="text-red-400 text-sm mt-1">{errors.phone}</p>
-                    )}
-                  </div>
-
-                  {/* Email */}
-                  <div className="md:col-span-2">
-                    <label className="block text-white font-medium mb-2">
-                      <Mail className="w-4 h-4 inline mr-2" />
-                      E-posta *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
-                        errors.email ? 'border-red-500' : 'border-white/10'
-                      } text-white placeholder-white/40 focus:outline-none focus:border-amber-500 transition-colors`}
-                      placeholder="ornek@mail.com"
-                    />
-                    {errors.email && (
-                      <p className="text-red-400 text-sm mt-1">{errors.email}</p>
                     )}
                   </div>
 
