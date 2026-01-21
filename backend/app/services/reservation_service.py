@@ -13,9 +13,9 @@ class ReservationService:
         """Yeni rezervasyon oluştur"""
         data = reservation.dict()
         # Email is optional in the public reservation flow.
-        # Keep DB compatibility by storing empty string when not provided.
-        if not data.get("customer_email"):
-            data["customer_email"] = ""
+        # Store None instead of empty string (cleaner for optional fields).
+        if not data.get("customer_email") or not str(data.get("customer_email")).strip():
+            data["customer_email"] = None
 
         # Normalize timezone-aware datetimes (e.g. ISO strings with 'Z') to naive UTC
         dt = data.get("date")

@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_serializer
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 
 class ReservationBase(BaseModel):
@@ -21,6 +21,16 @@ class Reservation(ReservationBase):
     status: str
     created_at: datetime
     updated_at: datetime
+    
+    # Allow DB empty strings to serialize as None for response validation
+    customer_email: Optional[str] = None
+    
+    @field_serializer('customer_email')
+    def _serialize_email(self, value: Optional[str]) -> Optional[str]:
+        """Normalize empty/invalid emails to None for API responses."""
+        if not value or not value.strip():
+            return None
+        return value
     
     class Config:
         from_attributes = True
