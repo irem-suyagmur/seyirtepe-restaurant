@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { SiteSettingsProvider } from './context/SiteSettingsContext'
 import MainLayout from './components/layout/MainLayout'
@@ -34,6 +34,9 @@ function App() {
       <CartProvider>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
+            {/* Some hosts/browser caches can land on /index.html; normalize to / */}
+            <Route path="/index.html" element={<Navigate to="/" replace />} />
+
             {/* Admin Routes - No Layout */}
             <Route path="/admin/login" element={<AdminLogin />} />
             
