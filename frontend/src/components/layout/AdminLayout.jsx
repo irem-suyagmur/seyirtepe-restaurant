@@ -13,6 +13,7 @@ import {
   ChefHat,
   Globe
 } from 'lucide-react'
+import AdminNotifier from './AdminNotifier'
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -122,6 +123,7 @@ const AdminLayout = () => {
             </button>
 
             <div className="flex items-center gap-4 ml-auto">
+              <AdminNotifier />
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-white">Admin</p>
                 <p className="text-xs text-white/60">admin@seyirtepe.com</p>

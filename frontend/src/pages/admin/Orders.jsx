@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ShoppingCart, User, Phone, MapPin, Clock, DollarSign, Package, CheckCircle, XCircle, AlertCircle, Filter, Search } from 'lucide-react';
+import { ShoppingCart, Clock, Package, CheckCircle, XCircle, Filter, Search, Bell, Volume2, VolumeX } from 'lucide-react';
 import api from '../../services/api';
+
+const POLL_INTERVAL_MS = 8000;
+const ALARM_BEEPS = 6;
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -12,21 +15,175 @@ function Orders() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('ordersSoundEnabled') !== '0';
+    } catch {
+      return true;
+    }
+  });
+
+  const lastSeenOrderIdRef = useRef(null);
+  const didInitialLoadRef = useRef(false);
+  const audioCtxRef = useRef(null);
+  const titleRef = useRef(typeof document !== 'undefined' ? document.title : '');
+  const blinkTimerRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ordersSoundEnabled', soundEnabled ? '1' : '0');
+    } catch {
+      // ignore
+    }
+  }, [soundEnabled]);
+
   useEffect(() => {
     fetchOrders();
+
+    const timer = setInterval(() => {
+      fetchOrders({ silent: true });
+    }, POLL_INTERVAL_MS);
+
+    return () => {
+      clearInterval(timer);
+      if (blinkTimerRef.current) {
+        clearInterval(blinkTimerRef.current);
+        blinkTimerRef.current = null;
+      }
+      if (typeof document !== 'undefined' && titleRef.current) {
+        document.title = titleRef.current;
+      }
+    };
   }, []);
 
-  const fetchOrders = async () => {
+  const ensureAudioContext = () => {
+    if (audioCtxRef.current) return audioCtxRef.current;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtxRef.current = new Ctx();
+    return audioCtxRef.current;
+  };
+
+  const playAnnoyingAlarm = () => {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+
+    try {
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+    } catch {
+      // ignore
+    }
+
+    const now = ctx.currentTime;
+    const beepDuration = 0.12;
+    const gap = 0.08;
+    const baseFreq = 880;
+
+    for (let i = 0; i < ALARM_BEEPS; i += 1) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(baseFreq + (i % 2 === 0 ? 0 : 220), now);
+
+      const startAt = now + i * (beepDuration + gap);
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.35, startAt + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + beepDuration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startAt);
+      osc.stop(startAt + beepDuration + 0.02);
+    }
+  };
+
+  const blinkTitle = () => {
+    if (typeof document === 'undefined') return;
+    const original = titleRef.current || document.title;
+    titleRef.current = original;
+
+    if (blinkTimerRef.current) {
+      clearInterval(blinkTimerRef.current);
+    }
+
+    let on = false;
+    blinkTimerRef.current = setInterval(() => {
+      on = !on;
+      document.title = on ? '🔔 YENİ SİPARİŞ!' : original;
+    }, 700);
+
+    setTimeout(() => {
+      if (blinkTimerRef.current) {
+        clearInterval(blinkTimerRef.current);
+        blinkTimerRef.current = null;
+      }
+      document.title = original;
+    }, 10000);
+  };
+
+  const triggerNewOrderAlert = (count) => {
+    showMessage('success', `Yeni sipariş geldi (${count})`);
+
+    if (soundEnabled) {
+      playAnnoyingAlarm();
+    }
+
+    if (navigator?.vibrate) {
+      try {
+        navigator.vibrate([200, 100, 200, 100, 400]);
+      } catch {
+        // ignore
+      }
+    }
+
+    blinkTitle();
+
+    if (typeof Notification !== 'undefined' && document?.hidden) {
+      try {
+        if (Notification.permission === 'granted') {
+          new Notification('Yeni Sipariş!', { body: `Yeni sipariş sayısı: ${count}` });
+        }
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const fetchOrders = async ({ silent = false } = {}) => {
     try {
       const response = await api.get('/orders');
       const data = response.data;
-      setOrders(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setOrders(list);
+
+      const maxId = list.reduce((acc, o) => Math.max(acc, Number(o?.id) || 0), 0);
+      const lastSeen = Number(lastSeenOrderIdRef.current) || 0;
+
+      if (!didInitialLoadRef.current) {
+        didInitialLoadRef.current = true;
+        lastSeenOrderIdRef.current = maxId;
+      } else if (maxId > lastSeen) {
+        const newCount = list.filter((o) => (Number(o?.id) || 0) > lastSeen).length || 1;
+        lastSeenOrderIdRef.current = maxId;
+        if (!silent) {
+          triggerNewOrderAlert(newCount);
+        } else {
+          // even in silent polling, still alert on new orders
+          triggerNewOrderAlert(newCount);
+        }
+      }
     } catch (error) {
-      showMessage('error', 'Siparişler yüklenirken hata oluştu');
+      if (!silent) {
+        showMessage('error', 'Siparişler yüklenirken hata oluştu');
+      }
       console.error('Error fetching orders:', error);
       setOrders([]);
     } finally {
-      setLoading(false);
+      setLoading((prev) => (prev ? false : prev));
     }
   };
 
@@ -152,6 +309,40 @@ function Orders() {
               <div>
                 <h1 className="text-3xl font-bold text-white">Siparişler</h1>
                 <p className="text-white/60">Müşteri siparişlerini yönetin</p>
+              </div>
+
+              <div className="ml-auto flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // prime audio context on user gesture
+                    try {
+                      ensureAudioContext();
+                    } catch {
+                      // ignore
+                    }
+                    setSoundEnabled((v) => !v);
+                  }}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border backdrop-blur-xl transition-all ${
+                    soundEnabled
+                      ? 'bg-red-500/15 border-red-500/30 text-red-200 hover:bg-red-500/20'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}
+                  title={soundEnabled ? 'Sesli bildirim açık' : 'Sesli bildirim kapalı'}
+                >
+                  <Bell className="w-4 h-4" />
+                  {soundEnabled ? (
+                    <>
+                      <Volume2 className="w-4 h-4" />
+                      Ses Açık
+                    </>
+                  ) : (
+                    <>
+                      <VolumeX className="w-4 h-4" />
+                      Sessiz
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
