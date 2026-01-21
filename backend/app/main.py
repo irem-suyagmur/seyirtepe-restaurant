@@ -33,11 +33,15 @@ class _ExceptionToJSONMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         except HTTPException:
             raise
-        except Exception:
+        except Exception as exc:
             # Avoid raw 500 responses (which browsers often surface as "CORS" issues
             # because headers are missing). Log details server-side.
             logger.exception("Unhandled server error")
-            return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+            content = {"detail": "Internal Server Error"}
+            if not is_production:
+                content["error"] = type(exc).__name__
+                content["message"] = str(exc)
+            return JSONResponse(status_code=500, content=content)
 
 
 # Error shielding first, then CORS so even error responses include CORS headers
