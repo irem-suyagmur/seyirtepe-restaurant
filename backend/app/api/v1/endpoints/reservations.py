@@ -5,6 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 import logging
 from app.database import get_db
+from app.config import settings
 from app.schemas.reservation import Reservation, ReservationCreate
 from app.services.reservation_service import ReservationService
 from app.models.reservation import ReservationStatus
@@ -12,6 +13,8 @@ from app.security import require_admin
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+is_production = (getattr(settings, "ENVIRONMENT", "development") or "development").lower() == "production"
 
 
 class ReservationStatusUpdate(BaseModel):
@@ -39,7 +42,10 @@ def create_reservation(
         raise
     except Exception as exc:
         logger.exception("Failed to create reservation")
-        raise HTTPException(status_code=500, detail="Reservation could not be created") from exc
+        detail = "Reservation could not be created"
+        if not is_production:
+            detail = f"{detail}: {type(exc).__name__}: {exc}"
+        raise HTTPException(status_code=500, detail=detail) from exc
 
 
 @router.get("/", response_model=List[Reservation])
