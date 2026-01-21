@@ -42,8 +42,19 @@ api.interceptors.response.use(
     // Handle errors globally
     if (error.response?.status === 401) {
       // Handle unauthorized
+      const hadAdminToken = !!localStorage.getItem('adminToken')
       localStorage.removeItem('adminToken')
       localStorage.removeItem('token')
+
+      // If we're in admin UI, force re-login
+      if (typeof window !== 'undefined') {
+        const path = window.location?.pathname || ''
+        const isAdminPath = path === '/admin' || path.startsWith('/admin/')
+        const isLoginPath = path === '/admin/login'
+        if (hadAdminToken && isAdminPath && !isLoginPath) {
+          window.location.assign('/admin/login')
+        }
+      }
     }
     return Promise.reject(error)
   }

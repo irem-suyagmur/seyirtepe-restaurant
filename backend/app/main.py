@@ -49,7 +49,9 @@ def on_startup():
 app.include_router(api_router, prefix="/api/v1")
 
 # Backward-compatible routes (some frontend builds call without /api/v1)
-app.include_router(api_router, include_in_schema=False)
+# Keep disabled in production to reduce attack surface.
+if not is_production:
+    app.include_router(api_router, include_in_schema=False)
 
 @app.get("/")
 def root():
