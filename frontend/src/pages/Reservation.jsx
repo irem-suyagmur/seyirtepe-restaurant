@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Calendar, Clock, Users, Phone, User, MessageSquare, ShoppingCart, X, Plus, Minus } from 'lucide-react'
+import { Calendar, Clock, Users, Phone, Mail, User, MessageSquare, ShoppingCart, X, Plus, Minus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import api from '../services/api'
 
