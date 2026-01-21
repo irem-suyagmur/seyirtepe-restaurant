@@ -1,13 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 from pathlib import Path
 from app.api.v1.api import api_router
 from app.config import settings
 from app.database import init_db
 import os
+import logging
 
 is_production = (getattr(settings, "ENVIRONMENT", "development") or "development").lower() == "production"
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Seyirtepe Restaurant Cafe API",
@@ -21,6 +26,22 @@ app = FastAPI(
 # Uploads klasörünü oluştur ve statik servis et
 Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
+class _ExceptionToJSONMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        try:
+            return await call_next(request)
+        except HTTPException:
+            raise
+        except Exception:
+            # Avoid raw 500 responses (which browsers often surface as "CORS" issues
+            # because headers are missing). Log details server-side.
+            logger.exception("Unhandled server error")
+            return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+
+
+# Error shielding first, then CORS so even error responses include CORS headers
+app.add_middleware(_ExceptionToJSONMiddleware)
 
 # CORS ayarları
 app.add_middleware(
