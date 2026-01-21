@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Image as ImageIcon, Upload, Trash2, Edit2, X, Save } from 'lucide-react'
-import api from '../../services/api'
+import api, { toAbsoluteApiUrl } from '../../services/api'
 
 const GalleryAdmin = () => {
   const [images, setImages] = useState([])
@@ -34,9 +34,10 @@ const GalleryAdmin = () => {
     try {
       setLoading(true)
       const response = await api.get('/gallery')
-      setImages(response.data)
+      setImages(Array.isArray(response.data) ? response.data : [])
     } catch (error) {
       console.error('Galeri resimleri yüklenirken hata:', error)
+      setImages([])
     } finally {
       setLoading(false)
     }
@@ -188,7 +189,7 @@ const GalleryAdmin = () => {
           >
             <div className="aspect-square relative overflow-hidden bg-black/20">
               <img
-                src={`${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://seyirtepe-api.onrender.com'}${image.image_url}`}
+                src={toAbsoluteApiUrl(image.image_url)}
                 alt={image.title || 'Gallery image'}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />

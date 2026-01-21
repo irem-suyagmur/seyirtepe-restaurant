@@ -20,6 +20,24 @@ const api = axios.create({
   },
 })
 
+export const getApiOrigin = () => {
+  try {
+    const base = api.defaults.baseURL || API_URL
+    const fallback = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    return new URL(String(base), fallback).origin
+  } catch {
+    return String(normalizedBaseUrl).replace(/\/+$/, '').replace(/\/api\/v1\/?$/, '')
+  }
+}
+
+export const toAbsoluteApiUrl = (pathOrUrl) => {
+  if (!pathOrUrl) return ''
+  const value = String(pathOrUrl)
+  if (/^https?:\/\//i.test(value)) return value
+  const prefix = getApiOrigin()
+  return value.startsWith('/') ? `${prefix}${value}` : `${prefix}/${value}`
+}
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
