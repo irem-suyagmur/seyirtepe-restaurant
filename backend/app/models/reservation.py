@@ -16,7 +16,7 @@ class Reservation(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String, nullable=False)
-    customer_email = Column(String, nullable=False)
+    customer_email = Column(String, nullable=True)
     customer_phone = Column(String, nullable=False)
     date = Column(DateTime, nullable=False)
     guests = Column(Integer, nullable=False)

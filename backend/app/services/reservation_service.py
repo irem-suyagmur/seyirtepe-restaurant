@@ -10,7 +10,13 @@ class ReservationService:
     
     def create_reservation(self, reservation: ReservationCreate) -> ReservationModel:
         """Yeni rezervasyon oluştur"""
-        db_reservation = ReservationModel(**reservation.dict())
+        data = reservation.dict()
+        # Email is optional in the public reservation flow.
+        # Keep DB compatibility by storing empty string when not provided.
+        if not data.get("customer_email"):
+            data["customer_email"] = ""
+
+        db_reservation = ReservationModel(**data)
         self.db.add(db_reservation)
         self.db.commit()
         self.db.refresh(db_reservation)

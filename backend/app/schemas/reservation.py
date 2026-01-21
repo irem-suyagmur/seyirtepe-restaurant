@@ -5,7 +5,7 @@ from typing import Optional
 
 class ReservationBase(BaseModel):
     customer_name: str
-    customer_email: EmailStr
+    customer_email: Optional[EmailStr] = None
     customer_phone: str
     date: datetime
     guests: int
