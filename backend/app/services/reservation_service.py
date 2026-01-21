@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import timezone
 from app.models.reservation import Reservation as ReservationModel
 from app.schemas.reservation import ReservationCreate
 
@@ -15,6 +16,11 @@ class ReservationService:
         # Keep DB compatibility by storing empty string when not provided.
         if not data.get("customer_email"):
             data["customer_email"] = ""
+
+        # Normalize timezone-aware datetimes (e.g. ISO strings with 'Z') to naive UTC
+        dt = data.get("date")
+        if getattr(dt, "tzinfo", None) is not None and dt.tzinfo is not None:
+            data["date"] = dt.astimezone(timezone.utc).replace(tzinfo=None)
 
         db_reservation = ReservationModel(**data)
         self.db.add(db_reservation)

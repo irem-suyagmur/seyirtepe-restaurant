@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
+from urllib.parse import urlparse
 
 
 class Settings(BaseSettings):
@@ -24,6 +25,16 @@ class Settings(BaseSettings):
         "https://decimus.maxicloud.online",
         "http://decimus.maxicloud.online"
     ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def _parse_allowed_origins(cls, v):
+        # pydantic-settings may pass env vars as a single comma-separated string.
+        if v is None:
+            return v
+        if isinstance(v, str):
+            return [part.strip() for part in v.split(",") if part.strip()]
+        return v
     
     # Database (SQLite)
     DATABASE_URL: str = "sqlite:///./seyirtepe.db"
@@ -42,6 +53,29 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _validate_security(self):
         env = (self.ENVIRONMENT or "development").lower()
+
+        # Normalize/expand allowed origins (avoid subtle www vs non-www CORS failures)
+        normalized: List[str] = []
+        for origin in (self.ALLOWED_ORIGINS or []):
+            if not origin:
+                continue
+            normalized.append(str(origin).rstrip("/"))
+
+        expanded = set(normalized)
+        for origin in list(normalized):
+            parsed = urlparse(origin)
+            if not parsed.scheme or not parsed.netloc:
+                continue
+
+            host = parsed.netloc
+            if host.startswith("www."):
+                alt_host = host[4:]
+            else:
+                alt_host = f"www.{host}"
+            expanded.add(f"{parsed.scheme}://{alt_host}")
+
+        self.ALLOWED_ORIGINS = list(expanded)
+
         if env == "production":
             if self.SECRET_KEY in {"your-secret-key-change-in-production", "CHANGE_ME", ""}:
                 raise ValueError("SECRET_KEY must be set in production")
