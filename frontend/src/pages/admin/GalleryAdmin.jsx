@@ -7,8 +7,11 @@ const GalleryAdmin = () => {
   const [loading, setLoading] = useState(true)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
+  const [imageToDelete, setImageToDelete] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -115,16 +118,26 @@ const GalleryAdmin = () => {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) return
+  const openDeleteModal = (image) => {
+    setImageToDelete(image)
+    setShowDeleteModal(true)
+  }
+
+  const handleDelete = async () => {
+    if (!imageToDelete) return
 
     try {
-      await api.delete(`/gallery/${id}`)
+      setDeleting(true)
+      await api.delete(`/gallery/${imageToDelete.id}`)
       alert('Resim başarıyla silindi!')
+      setShowDeleteModal(false)
+      setImageToDelete(null)
       fetchImages()
     } catch (error) {
       console.error('Silme hatası:', error)
       alert('Resim silinirken hata oluştu')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -218,7 +231,7 @@ const GalleryAdmin = () => {
                 <Edit2 className="w-4 h-4" />
               </button>
               <button
-                onClick={() => handleDelete(image.id)}
+                onClick={() => openDeleteModal(image)}
                 className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-colors duration-200"
               >
                 <Trash2 className="w-4 h-4" />
@@ -358,6 +371,74 @@ const GalleryAdmin = () => {
                   className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {uploading ? 'Yükleniyor...' : 'Yükle'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && imageToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Resmi Sil</h2>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setImageToDelete(null)
+                }}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Image Preview */}
+              <div className="w-full h-48 rounded-xl overflow-hidden">
+                <img
+                  src={toAbsoluteApiUrl(imageToDelete.image_url)}
+                  alt={imageToDelete.title || 'Gallery image'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Warning Message */}
+              <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                <p className="text-red-200 text-center">
+                  {imageToDelete.title ? (
+                    <>
+                      <span className="font-bold">{imageToDelete.title}</span> adlı resmi silmek istediğinizden emin misiniz?
+                    </>
+                  ) : (
+                    'Bu resmi silmek istediğinizden emin misiniz?'
+                  )}
+                </p>
+                <p className="text-red-200/70 text-sm text-center mt-2">
+                  Bu işlem geri alınamaz.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false)
+                    setImageToDelete(null)
+                  }}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 backdrop-blur-xl bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  {deleting ? 'Siliniyor...' : 'Sil'}
                 </button>
               </div>
             </div>
