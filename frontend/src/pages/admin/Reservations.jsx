@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Users, Mail, Phone, Clock, Filter, Check, X, Eye, MessageSquare, Search } from 'lucide-react';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+import api from '../../services/api';
 
 function Reservations() {
   const [reservations, setReservations] = useState([]);
@@ -19,7 +17,7 @@ function Reservations() {
 
   const fetchReservations = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/reservations`);
+      const response = await api.get('/reservations');
       setReservations(response.data);
     } catch (error) {
       showMessage('error', 'Rezervasyonlar yüklenirken hata oluştu');
@@ -36,7 +34,7 @@ function Reservations() {
 
   const updateReservationStatus = async (id, status) => {
     try {
-      await axios.patch(`${API_BASE_URL}/reservations/${id}`, { status });
+      await api.patch(`/reservations/${id}`, { status });
       showMessage('success', `Rezervasyon ${getStatusText(status)} olarak işaretlendi`);
       fetchReservations();
       setShowDetailModal(false);

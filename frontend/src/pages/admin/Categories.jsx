@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Tag, Grid3x3, ArrowUpDown } from 'lucide-react';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+import api from '../../services/api';
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
@@ -24,7 +22,7 @@ export default function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/categories`);
+      const response = await api.get('/categories');
       setCategories(response.data);
     } catch (error) {
       showMessage('error', 'Kategoriler yüklenirken hata oluştu');
@@ -49,10 +47,10 @@ export default function Categories() {
       };
 
       if (editingCategory) {
-        await axios.put(`${API_BASE_URL}/categories/${editingCategory.id}`, categoryData);
+        await api.put(`/categories/${editingCategory.id}`, categoryData);
         showMessage('success', 'Kategori başarıyla güncellendi');
       } else {
-        await axios.post(`${API_BASE_URL}/categories`, categoryData);
+        await api.post('/categories', categoryData);
         showMessage('success', 'Kategori başarıyla eklendi');
       }
 
@@ -72,7 +70,7 @@ export default function Categories() {
     if (!deleteModal.category) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/categories/${deleteModal.category.id}`);
+      await api.delete(`/categories/${deleteModal.category.id}`);
       showMessage('success', 'Kategori başarıyla silindi');
       fetchCategories();
       setDeleteModal({ show: false, category: null });

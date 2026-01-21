@@ -1,6 +1,13 @@
 import axios from 'axios'
 
-const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const getDefaultBaseUrl = () => {
+  if (typeof window === 'undefined') return 'http://localhost:8000'
+  const host = window.location.hostname
+  const isLocal = host === 'localhost' || host === '127.0.0.1'
+  return isLocal ? 'http://localhost:8000' : 'https://seyirtepe-api.onrender.com'
+}
+
+const rawBaseUrl = import.meta.env.VITE_API_URL || getDefaultBaseUrl()
 const normalizedBaseUrl = String(rawBaseUrl).replace(/\/+$/, '')
 const API_URL = normalizedBaseUrl.includes('/api/v1')
   ? normalizedBaseUrl

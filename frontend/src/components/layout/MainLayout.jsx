@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import ParallaxBackground from './ParallaxBackground';
@@ -6,6 +7,7 @@ import Footer from './Footer';
 
 const MainLayout = () => {
   const location = useLocation();
+  const showFancyBackground = location.pathname === '/';
 
   // Page transition variants
   const pageVariants = {
@@ -33,8 +35,11 @@ const MainLayout = () => {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      {/* Parallax Background - Fixed */}
-      <ParallaxBackground />
+      {/* Lightweight base background (always on) */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-amber-900/10 via-orange-900/10 to-black" />
+
+      {/* Heavy animated background (home only) */}
+      {showFancyBackground ? <ParallaxBackground /> : null}
 
       {/* Navigation */}
       <Navigation />
@@ -118,8 +123,5 @@ const ScrollToTop = () => {
     </AnimatePresence>
   );
 };
-
-// Add missing import
-import { useState, useEffect } from 'react';
 
 export default MainLayout;

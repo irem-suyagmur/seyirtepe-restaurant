@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Upload, Image as ImageIcon, Search, Package, DollarSign, Grid3x3, Filter } from 'lucide-react';
-import axios from 'axios';
+import api from '../../services/api';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const getBackendOrigin = () => {
+  const base = api?.defaults?.baseURL || '';
+  return String(base).replace(/\/?api\/v1\/?$/, '').replace(/\/+$/, '');
+};
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -33,7 +36,7 @@ function Products() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/products`);
+      const response = await api.get('/products');
       setProducts(response.data);
     } catch (error) {
       showMessage('error', 'Ürünler yüklenirken hata oluştu');
@@ -45,7 +48,7 @@ function Products() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/categories`);
+      const response = await api.get('/categories');
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -74,10 +77,10 @@ function Products() {
       };
 
       if (editingProduct) {
-        await axios.put(`${API_BASE_URL}/products/${editingProduct.id}`, productData);
+        await api.put(`/products/${editingProduct.id}`, productData);
         showMessage('success', 'Ürün başarıyla güncellendi');
       } else {
-        await axios.post(`${API_BASE_URL}/products`, productData);
+        await api.post('/products', productData);
         showMessage('success', 'Ürün başarıyla eklendi');
       }
 
@@ -97,7 +100,7 @@ function Products() {
     if (!deleteModal.product) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/products/${deleteModal.product.id}`);
+      await api.delete(`/products/${deleteModal.product.id}`);
       showMessage('success', 'Ürün başarıyla silindi');
       fetchProducts();
       setDeleteModal({ show: false, product: null });
@@ -160,11 +163,11 @@ function Products() {
         const data = new FormData();
         data.append('file', file);
 
-        const response = await axios.post(`${API_BASE_URL}/products/upload-image`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        const response = await api.post('/products/upload-image', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        const backendOrigin = API_BASE_URL.replace('/api/v1', '');
+        const backendOrigin = getBackendOrigin();
         const uploadedUrl = response?.data?.url ? `${backendOrigin}${response.data.url}` : '';
         if (!uploadedUrl) {
           throw new Error('Upload response missing url');
