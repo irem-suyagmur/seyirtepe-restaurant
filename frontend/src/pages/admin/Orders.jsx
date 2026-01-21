@@ -19,10 +19,12 @@ function Orders() {
   const fetchOrders = async () => {
     try {
       const response = await api.get('/orders');
-      setOrders(response.data);
+      const data = response.data;
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       showMessage('error', 'Siparişler yüklenirken hata oluştu');
       console.error('Error fetching orders:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -292,15 +294,21 @@ function Orders() {
                 {/* Items */}
                 <div className="lg:col-span-3">
                   <div className="space-y-1">
-                    {Array.isArray(order.items) && order.items.slice(0, 2).map((item, idx) => (
-                      <div key={idx} className="text-sm text-white/80">
-                        {item.product_name} x{item.quantity}
-                      </div>
-                    ))}
-                    {Array.isArray(order.items) && order.items.length > 2 && (
-                      <div className="text-xs text-white/50">
-                        +{order.items.length - 2} ürün daha
-                      </div>
+                    {Array.isArray(order.items) && order.items.length > 0 ? (
+                      <>
+                        {order.items.slice(0, 2).map((item, idx) => (
+                          <div key={idx} className="text-sm text-white/80">
+                            {item.product_name || 'Ürün'} x{item.quantity || 1}
+                          </div>
+                        ))}
+                        {order.items.length > 2 && (
+                          <div className="text-xs text-white/50">
+                            +{order.items.length - 2} ürün daha
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-sm text-white/60">Ürün bilgisi yok</div>
                     )}
                   </div>
                 </div>
@@ -370,12 +378,16 @@ function Orders() {
                 <div>
                   <p className="text-sm text-white/60 mb-2">Ürünler</p>
                   <div className="space-y-2">
-                    {Array.isArray(selectedOrder.items) && selectedOrder.items.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-white/5">
-                        <span className="text-white">{item.product_name} x{item.quantity}</span>
-                        <span className="text-green-400 font-semibold">₺{(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
+                    {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
+                      selectedOrder.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                          <span className="text-white">{item.product_name || 'Ürün'} x{item.quantity || 1}</span>
+                          <span className="text-green-400 font-semibold">₺{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-white/60 p-3">Ürün bilgisi yok</div>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
