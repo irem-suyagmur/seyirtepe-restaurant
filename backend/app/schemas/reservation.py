@@ -1,11 +1,10 @@
-from pydantic import BaseModel, EmailStr, field_serializer
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 
 class ReservationBase(BaseModel):
     customer_name: str
-    customer_email: Optional[EmailStr] = None
     customer_phone: str
     date: datetime
     guests: int
@@ -13,7 +12,19 @@ class ReservationBase(BaseModel):
 
 
 class ReservationCreate(ReservationBase):
-    pass
+    # Accept email as optional string (can be None or valid email)
+    customer_email: Optional[str] = None
+    
+    @field_validator('customer_email')
+    @classmethod
+    def validate_email(cls, v):
+        """Accept None, empty string, or valid email format."""
+        if v is None or v == '':
+            return None
+        # Basic email check if provided
+        if '@' not in v:
+            raise ValueError('Invalid email format')
+        return v.strip()
 
 
 class Reservation(ReservationBase):
@@ -21,16 +32,8 @@ class Reservation(ReservationBase):
     status: str
     created_at: datetime
     updated_at: datetime
-    
-    # Allow DB empty strings to serialize as None for response validation
+    # Response field: plain string, no strict validation (allows empty/None)
     customer_email: Optional[str] = None
-    
-    @field_serializer('customer_email')
-    def _serialize_email(self, value: Optional[str]) -> Optional[str]:
-        """Normalize empty/invalid emails to None for API responses."""
-        if not value or not value.strip():
-            return None
-        return value
     
     class Config:
         from_attributes = True
