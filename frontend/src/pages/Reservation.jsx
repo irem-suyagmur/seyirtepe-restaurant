@@ -8,6 +8,7 @@ const Reservation = () => {
   const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, clearCart } = useCart()
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     date: '',
     time: '',
@@ -46,6 +47,9 @@ const Reservation = () => {
     if (!formData.name.trim()) {
       newErrors.name = 'İsim gerekli'
     }
+    if (!formData.email.trim()) {
+      newErrors.email = 'E-posta gerekli'
+    }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Telefon gerekli'
     }
@@ -70,7 +74,7 @@ const Reservation = () => {
 
       const reservationPayload = {
         customer_name: formData.name.trim(),
-        customer_email: null,
+        customer_email: formData.email.trim(),
         customer_phone: formData.phone.trim(),
         date: reservationDateTime.toISOString(),
         guests: Number.isFinite(guestsValue) ? guestsValue : 2,
@@ -106,8 +110,8 @@ const Reservation = () => {
       setSubmitMessage({
         type: 'success',
         text: cartItems.length > 0
-          ? 'Rezervasyonunuz ve siparişiniz alındı. Admin panelinden görüntülenebilir.'
-          : 'Rezervasyonunuz alındı. Admin panelinden görüntülenebilir.'
+          ? 'Rezervasyonunuz ve siparişiniz alındı.'
+          : 'Rezervasyonunuz alındı.'
       })
 
       if (cartItems.length > 0) {
@@ -116,6 +120,7 @@ const Reservation = () => {
 
       setFormData({
         name: '',
+        email: '',
         phone: '',
         date: '',
         time: '',
@@ -249,6 +254,27 @@ const Reservation = () => {
                     />
                     {errors.name && (
                       <p className="text-red-400 text-sm mt-1">{errors.name}</p>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div className="md:col-span-2">
+                    <label className="block text-white font-medium mb-2 text-sm sm:text-base">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 inline mr-2" />
+                      E-posta *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                        errors.email ? 'border-red-500' : 'border-white/10'
+                      } text-white placeholder-white/40 focus:outline-none focus:border-amber-500 transition-colors`}
+                      placeholder="ornek@email.com"
+                    />
+                    {errors.email && (
+                      <p className="text-red-400 text-sm mt-1">{errors.email}</p>
                     )}
                   </div>
 
@@ -414,7 +440,7 @@ const Reservation = () => {
               {/* Note */}
               <div className="backdrop-blur-xl bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6">
                 <p className="text-amber-300 text-sm">
-                  <strong>Not:</strong> Rezervasyonunuz onaylandıktan sonra size e-posta veya telefon ile bilgi verilecektir.
+                  <strong>Not:</strong> Rezervasyonunuz onaylandıktan sonra size telefon ile bilgi verilecektir.
                 </p>
               </div>
             </div>

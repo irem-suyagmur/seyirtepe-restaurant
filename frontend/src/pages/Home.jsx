@@ -43,10 +43,6 @@ const Home = () => {
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
                 <span>Amik Ovası, Hatay</span>
               </div>
-              <div className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base">
-                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-amber-400 flex-shrink-0" />
-                <span>4.9/5 Müşteri Memnuniyeti</span>
-              </div>
             </div>
           </div>
         </div>

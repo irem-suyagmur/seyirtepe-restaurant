@@ -76,7 +76,7 @@ const Gallery = () => {
             </h1>
             
             <p className="text-base sm:text-lg md:text-xl text-white/70 max-w-2xl mx-auto px-4">
-              Restoranımızın, yemeklerimizin ve etkinliklerimizin fotoğraflarını keşfedin
+              Seyirtepe'den görüntüler
             </p>
           </div>
         </div>

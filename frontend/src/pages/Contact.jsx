@@ -283,8 +283,8 @@ const Contact = () => {
                 <div className="mt-6 backdrop-blur-xl bg-green-500/20 border border-green-500/30 rounded-2xl p-6 flex items-center gap-4">
                   <CheckCircle className="w-8 h-8 text-green-400 flex-shrink-0" />
                   <div>
-                    <h3 className="text-white font-bold text-lg">Mesaj Gönderildi!</h3>
-                    <p className="text-white/80">En kısa sürede size dönüş yapacağız.</p>
+                    <h3 className="text-white font-bold text-lg">Mesajınız alındı!</h3>
+                    <p className="text-white/80">Size geri dönüş yapılacaktır.</p>
                   </div>
                 </div>
               )}
