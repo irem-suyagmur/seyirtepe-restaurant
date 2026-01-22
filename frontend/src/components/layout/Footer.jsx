@@ -82,12 +82,8 @@ const Footer = () => {
                 <Clock className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
                 <div className="space-y-2">
                   <div className="flex justify-between gap-4">
-                    <span className="text-white/60">Pazartesi - Cuma</span>
-                    <span className="text-white font-medium">10:00 - 23:00</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-white/60">Cumartesi - Pazar</span>
-                    <span className="text-white font-medium">09:00 - 00:00</span>
+                    <span className="text-white/60">Her Gün</span>
+                    <span className="text-white font-medium">24 Saat Açık</span>
                   </div>
                 </div>
               </div>

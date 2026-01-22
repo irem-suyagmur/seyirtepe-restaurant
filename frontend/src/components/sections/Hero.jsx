@@ -66,7 +66,7 @@ const Hero = () => {
                 </div>
                 <div>
                   <div className="text-xs sm:text-sm text-white/50">Açılış</div>
-                  <div className="text-sm sm:text-base font-semibold text-white">10:00 - 23:00</div>
+                  <div className="text-sm sm:text-base font-semibold text-white">7/24 Açık</div>
                 </div>
               </div>
             </div>

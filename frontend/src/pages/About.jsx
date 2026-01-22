@@ -154,16 +154,8 @@ const About = () => {
             
             <div className="space-y-3">
               <div className="flex justify-between items-center pb-3 border-b border-white/10">
-                <span className="text-white/70 text-base md:text-lg">Pazartesi - Cuma</span>
-                <span className="text-white font-semibold text-base md:text-lg">10:00 - 23:00</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-white/10">
-                <span className="text-white/70 text-base md:text-lg">Cumartesi</span>
-                <span className="text-white font-semibold text-base md:text-lg">09:00 - 00:00</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white/70 text-base md:text-lg">Pazar</span>
-                <span className="text-white font-semibold text-base md:text-lg">09:00 - 00:00</span>
+                <span className="text-white/70 text-base md:text-lg">Her Gün</span>
+                <span className="text-white font-semibold text-base md:text-lg">24 Saat Açık</span>
               </div>
             </div>
 
