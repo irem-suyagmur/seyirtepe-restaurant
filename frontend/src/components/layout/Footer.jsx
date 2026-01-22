@@ -122,6 +122,23 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Google Maps 360 */}
+        <div className="mt-12 mb-8">
+          <h3 className="text-lg font-bold text-white mb-6 text-center">Konumumuz</h3>
+          <div className="relative w-full h-80 rounded-2xl overflow-hidden border border-white/10">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!4v1737563924816!6m8!1m7!1sCAoSLEFGMVFpcE9MNUdzSURZSWxGSEFZWkEwdmRBcWU3VXhsM3BQLU5NTklRMWYz!2m2!1d36.48905856!2d36.21977692!3f0!4f0!5f0.7820865974627469"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Seyirtepe Restaurant Konum"
+            />
+          </div>
+        </div>
+
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
