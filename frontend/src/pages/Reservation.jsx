@@ -427,12 +427,8 @@ const Reservation = () => {
                 <h3 className="text-white font-bold text-xl mb-4">Çalışma Saatleri</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/60">Pazartesi - Cuma</span>
-                    <span className="text-white font-medium">10:00 - 23:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Cumartesi - Pazar</span>
-                    <span className="text-white font-medium">09:00 - 00:00</span>
+                    <span className="text-white/60">Her Gün</span>
+                    <span className="text-white font-medium">24 Saat Açık</span>
                   </div>
                 </div>
               </div>

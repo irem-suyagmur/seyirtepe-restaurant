@@ -37,7 +37,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8 border-t border-white/20">
               <div className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
-                <span>10:00 - 23:00</span>
+                <span>7/24 Açık</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />

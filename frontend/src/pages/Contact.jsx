@@ -154,12 +154,8 @@ const Contact = () => {
                 <h3 className="text-white font-bold text-lg mb-4">Çalışma Saatleri</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/70">Pazartesi - Cuma</span>
-                    <span className="text-white">10:00 - 23:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Cumartesi - Pazar</span>
-                    <span className="text-white">09:00 - 00:00</span>
+                    <span className="text-white/60">Her Gün</span>
+                    <span className="text-white">24 Saat Açık</span>
                   </div>
                 </div>
               </div>
