@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
@@ -33,13 +33,6 @@ class Order(OrderBase):
     created_at: datetime
     updated_at: datetime
     
-    @field_validator('status')
-    @classmethod
-    def normalize_status(cls, v):
-        """Normalize status to lowercase for consistent API responses."""
-        if v:
-            return str(v).lower()
-        return 'pending'
-    
     class Config:
         from_attributes = True
+        orm_mode = True  # Pydantic v1 compatibility
