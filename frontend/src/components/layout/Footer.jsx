@@ -96,10 +96,15 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-                <span className="text-white/60">
-                  Amik Ovası, Reyhanlı Yolu<br />
-                  Hatay, Türkiye
-                </span>
+                <a 
+                  href="https://www.google.com/maps/search/?api=1&query=Kıcı+mahallesi,+Belen+31000+Türkiye" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white/60 hover:text-amber-400 transition-colors"
+                >
+                  Kıcı mahallesi, Belen<br />
+                  31000 Türkiye
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-amber-400 flex-shrink-0" />
