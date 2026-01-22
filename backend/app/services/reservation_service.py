@@ -11,8 +11,12 @@ class ReservationService:
     
     def create_reservation(self, reservation: ReservationCreate) -> ReservationModel:
         """Yeni rezervasyon oluştur"""
-        # Pydantic v2: prefer model_dump (dict() is deprecated but may still exist)
-        data = reservation.model_dump()
+        # Support both Pydantic v1 (dict) and v2 (model_dump)
+        try:
+            data = reservation.model_dump()
+        except AttributeError:
+            data = reservation.dict()
+        
         # Email is optional in the public reservation flow.
         # Store None instead of empty string (cleaner for optional fields).
         if not data.get("customer_email") or not str(data.get("customer_email")).strip():
@@ -27,8 +31,12 @@ class ReservationService:
         self.db.add(db_reservation)
         try:
             self.db.commit()
-        except Exception:
+        except Exception as e:
             self.db.rollback()
+            # Log the actual error for debugging
+            import traceback
+            print(f"Reservation creation failed: {e}")
+            print(traceback.format_exc())
             raise
         self.db.refresh(db_reservation)
         return db_reservation
