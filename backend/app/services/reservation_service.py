@@ -18,9 +18,9 @@ class ReservationService:
             data = reservation.dict()
         
         # Email is optional in the public reservation flow.
-        # Store None instead of empty string (cleaner for optional fields).
+        # Use empty string for compatibility with existing DB constraints (often NOT NULL).
         if not data.get("customer_email") or not str(data.get("customer_email")).strip():
-            data["customer_email"] = None
+            data["customer_email"] = ""
 
         # Normalize timezone-aware datetimes (e.g. ISO strings with 'Z') to naive UTC
         dt = data.get("date")
