@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Enum, JSON
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, JSON
 from datetime import datetime
 import enum
 from app.database import Base
@@ -24,16 +24,8 @@ class Order(Base):
     items = Column(JSON, nullable=False)  # [{product_id, product_name, quantity, price}]
     total_amount = Column(Float, nullable=False)
     notes = Column(Text, nullable=True)
-    # Store enum VALUES ("pending") rather than NAMES ("PENDING") for Postgres
-    # compatibility across migrations.
-    status = Column(
-        Enum(
-            OrderStatus,
-            name="orderstatus",
-            values_callable=lambda enum_cls: [e.value for e in enum_cls],
-        ),
-        default=OrderStatus.PENDING,
-    )
+    # Use String instead of strict Enum to tolerate mixed case in existing DB data
+    status = Column(String, default=OrderStatus.PENDING.value)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
