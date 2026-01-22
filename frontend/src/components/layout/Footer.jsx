@@ -97,13 +97,12 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
                 <a 
-                  href="https://www.google.com/maps/search/?api=1&query=Kıcı+mahallesi,+Belen+31000+Türkiye" 
+                  href="https://www.google.com/maps/search/?api=1&query=Kıcı,+31350+Belen/Hatay" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-white/60 hover:text-amber-400 transition-colors"
                 >
-                  Kıcı mahallesi, Belen<br />
-                  31000 Türkiye
+                  Kıcı, 31350 Belen/Hatay
                 </a>
               </li>
               <li className="flex items-center gap-3">
