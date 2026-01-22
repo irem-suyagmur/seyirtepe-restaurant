@@ -35,5 +35,13 @@ class Reservation(ReservationBase):
     # Response field: plain string, no strict validation (allows empty/None)
     customer_email: Optional[str] = None
     
+    @field_validator('status')
+    @classmethod
+    def normalize_status(cls, v):
+        """Normalize status to lowercase for consistent API responses."""
+        if v:
+            return str(v).lower()
+        return 'pending'
+    
     class Config:
         from_attributes = True

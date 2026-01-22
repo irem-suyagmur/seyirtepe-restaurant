@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from datetime import datetime
 import enum
 from app.database import Base
@@ -21,15 +21,7 @@ class Reservation(Base):
     date = Column(DateTime, nullable=False)
     guests = Column(Integer, nullable=False)
     special_requests = Column(Text)
-    # Store enum VALUES ("pending") rather than NAMES ("PENDING") to avoid
-    # Postgres enum mismatches when the DB was created/migrated with lowercase values.
-    status = Column(
-        Enum(
-            ReservationStatus,
-            name="reservationstatus",
-            values_callable=lambda enum_cls: [e.value for e in enum_cls],
-        ),
-        default=ReservationStatus.PENDING,
-    )
+    # Use String instead of strict Enum to tolerate mixed case in existing DB data
+    status = Column(String, default=ReservationStatus.PENDING.value)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
