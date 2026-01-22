@@ -28,16 +28,9 @@ def create_reservation(
 ):
     """Yeni rezervasyon oluştur"""
     service = ReservationService(db)
-    # Catch unexpected errors so we return a proper JSON response that still
-    # passes through FastAPI/Starlette exception handling (avoids "CORS" masking
-    # caused by raw 500 responses generated outside CORS middleware).
     try:
         created = service.create_reservation(reservation)
-        # Return an explicit JSON response to avoid rare response_model
-        # serialization/validation issues bubbling up as raw 500s (which then
-        # look like CORS failures in the browser).
-        payload = Reservation.model_validate(created).model_dump(mode="json")
-        return JSONResponse(content=payload)
+        return created
     except HTTPException:
         raise
     except Exception as exc:
