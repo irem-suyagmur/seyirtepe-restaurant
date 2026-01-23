@@ -9,6 +9,7 @@ from app.services.product_service import ProductService
 from app.services.category_service import CategoryService
 from app.config import settings
 from app.security import require_admin
+from app.utils.cloudinary_upload import is_cloudinary_configured, upload_to_cloudinary
 
 router = APIRouter()
 
@@ -18,13 +19,34 @@ async def upload_product_image(
     file: UploadFile = File(...),
     _: dict = Depends(require_admin),
 ):
-    """Ürün görseli yükle ve erişilebilir URL döndür."""
+    """Ürün görseli yükle ve erişilebilir URL döndür. Cloudinary varsa buluta, yoksa lokale kaydeder."""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only image files are allowed"
         )
 
+    # Read file content
+    file_bytes = await file.read()
+    await file.close()
+    
+    if len(file_bytes) > settings.MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large (max {settings.MAX_UPLOAD_SIZE} bytes)"
+        )
+
+    # Try Cloudinary first (permanent cloud storage)
+    if is_cloudinary_configured():
+        result = upload_to_cloudinary(file_bytes, folder="products")
+        if result and result.get("url"):
+            return {
+                "url": result["url"],
+                "filename": result.get("public_id", ""),
+                "storage": "cloudinary"
+            }
+    
+    # Fallback to local storage
     upload_dir = Path(settings.UPLOAD_DIR) / "products"
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -42,33 +64,17 @@ async def upload_product_image(
     filename = f"{uuid.uuid4().hex}{suffix}"
     destination = upload_dir / filename
 
-    max_size = settings.MAX_UPLOAD_SIZE
-    total = 0
     try:
         with destination.open("wb") as out:
-            while True:
-                chunk = await file.read(1024 * 1024)
-                if not chunk:
-                    break
-                total += len(chunk)
-                if total > max_size:
-                    raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        detail=f"File too large (max {max_size} bytes)"
-                    )
-                out.write(chunk)
-    except HTTPException:
-        destination.unlink(missing_ok=True)
-        raise
+            out.write(file_bytes)
     except Exception:
         destination.unlink(missing_ok=True)
         raise
-    finally:
-        await file.close()
 
     return {
         "url": f"/uploads/products/{filename}",
         "filename": filename,
+        "storage": "local"
     }
 
 

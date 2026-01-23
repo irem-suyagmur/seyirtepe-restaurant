@@ -15,13 +15,17 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart))
-      } catch (error) {
-        console.error('Failed to parse cart from localStorage:', error)
+    try {
+      const savedCart = localStorage.getItem('cart')
+      if (savedCart && savedCart !== 'undefined' && savedCart !== 'null') {
+        const parsed = JSON.parse(savedCart)
+        if (Array.isArray(parsed)) {
+          setCartItems(parsed)
+        }
       }
+    } catch (error) {
+      console.error('Failed to parse cart from localStorage:', error)
+      localStorage.removeItem('cart')
     }
   }, [])
 

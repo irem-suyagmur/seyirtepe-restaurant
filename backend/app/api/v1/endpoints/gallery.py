@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.gallery import GalleryImage
 from app.config import settings
 from app.security import require_admin
+from app.utils.cloudinary_upload import is_cloudinary_configured, upload_to_cloudinary
 
 router = APIRouter()
 
@@ -57,13 +58,34 @@ async def upload_gallery_image(
     file: UploadFile = File(...),
     _: dict = Depends(require_admin),
 ):
-    """Galeri görseli yükle"""
+    """Galeri görseli yükle. Cloudinary varsa buluta, yoksa lokale kaydeder."""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only image files are allowed"
         )
 
+    # Read file content
+    file_bytes = await file.read()
+    await file.close()
+    
+    if len(file_bytes) > settings.MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large (max {settings.MAX_UPLOAD_SIZE} bytes)"
+        )
+
+    # Try Cloudinary first (permanent cloud storage)
+    if is_cloudinary_configured():
+        result = upload_to_cloudinary(file_bytes, folder="gallery")
+        if result and result.get("url"):
+            return {
+                "image_url": result["url"],
+                "filename": result.get("public_id", ""),
+                "storage": "cloudinary"
+            }
+
+    # Fallback to local storage
     upload_dir = Path(settings.UPLOAD_DIR) / "gallery"
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -81,30 +103,15 @@ async def upload_gallery_image(
     filename = f"{uuid.uuid4().hex}{suffix}"
     destination = upload_dir / filename
 
-    max_size = settings.MAX_UPLOAD_SIZE
-    total = 0
     try:
         with destination.open("wb") as out:
-            while True:
-                chunk = await file.read(1024 * 1024)
-                if not chunk:
-                    break
-                total += len(chunk)
-                if total > max_size:
-                    destination.unlink(missing_ok=True)
-                    raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        detail=f"File too large. Max size: {max_size / (1024*1024):.1f}MB"
-                    )
-                out.write(chunk)
-    except HTTPException:
-        raise
+            out.write(file_bytes)
     except Exception as e:
         destination.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
     image_url = f"/uploads/gallery/{filename}"
-    return {"image_url": image_url, "filename": filename}
+    return {"image_url": image_url, "filename": filename, "storage": "local"}
 
 
 @router.post("/", response_model=GalleryImageResponse, dependencies=[Depends(require_admin)])

@@ -18,6 +18,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 60000, // 60 saniye (Render cold start için)
 })
 
 export const getApiOrigin = () => {
@@ -38,6 +39,16 @@ export const toAbsoluteApiUrl = (pathOrUrl) => {
   return value.startsWith('/') ? `${prefix}${value}` : `${prefix}/${value}`
 }
 
+// If DB stored an absolute URL but it's an uploaded asset path, normalize it
+// to the current API origin so deployments/domain changes don't break images.
+export const normalizeUploadsUrl = (pathOrUrl) => {
+  if (!pathOrUrl) return ''
+  const value = String(pathOrUrl)
+  if (!/^https?:\/\//i.test(value)) return value
+  const idx = value.indexOf('/uploads/')
+  return idx >= 0 ? value.slice(idx) : value
+}
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -53,9 +64,27 @@ api.interceptors.request.use(
   }
 )
 
+// Safe JSON parse helper - prevents "undefined is not valid JSON" errors
+export const safeJsonParse = (value, fallback = null) => {
+  if (value === undefined || value === null || value === 'undefined' || value === 'null') {
+    return fallback
+  }
+  try {
+    return typeof value === 'string' ? JSON.parse(value) : value
+  } catch {
+    return fallback
+  }
+}
+
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Ensure response.data is never undefined
+    if (response.data === undefined) {
+      response.data = null
+    }
+    return response
+  },
   (error) => {
     // Handle errors globally
     if (error.response?.status === 401) {

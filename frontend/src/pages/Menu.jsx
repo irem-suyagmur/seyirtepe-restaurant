@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Loader2, Sparkles, ChefHat, ShoppingCart } from 'lucide-react';
-import { getCategoriesWithProducts } from '../services/api';
+import { getCategoriesWithProducts, toAbsoluteApiUrl, normalizeUploadsUrl } from '../services/api';
 import { useCart } from '../context/CartContext';
 
 const Menu = () => {
@@ -21,13 +21,15 @@ const Menu = () => {
     try {
       setLoading(true);
       const data = await getCategoriesWithProducts();
-      setCategories(data);
-      if (data.length > 0) {
-        setSelectedCategory(data[0].id);
+      const categories = Array.isArray(data) ? data : [];
+      setCategories(categories);
+      if (categories.length > 0) {
+        setSelectedCategory(categories[0].id);
       }
     } catch (err) {
       setError('Menü yüklenirken bir hata oluştu.');
       console.error('Menu fetch error:', err);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -200,7 +202,7 @@ const ProductCard = memo(({ product }) => {
           {product.image_url ? (
             <>
               <img
-                src={product.image_url}
+                src={toAbsoluteApiUrl(normalizeUploadsUrl(product.image_url))}
                 alt={product.name}
                 loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

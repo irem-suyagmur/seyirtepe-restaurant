@@ -88,7 +88,8 @@ SMTP_PORT=465
 SMTP_USER=noreply@yourdomain.com
 SMTP_PASSWORD=email-sifren
 SMTP_FROM=noreply@yourdomain.com
-UPLOAD_DIR=/opt/render/project/src/uploads
+# IMPORTANT: Use a persistent disk mount so uploads don't disappear after deploy/restart
+UPLOAD_DIR=/var/data/uploads
 ```
 
 **NOT:** `DATABASE_URL` için 2.2'de kopyaladığın URL'i yapıştır

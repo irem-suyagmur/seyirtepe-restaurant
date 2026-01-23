@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import field_validator, model_validator
 from urllib.parse import urlparse
 import json
+import os
 
 
 class Settings(BaseSettings):
@@ -66,6 +67,11 @@ class Settings(BaseSettings):
     def _validate_security(self):
         env = (self.ENVIRONMENT or "development").lower()
 
+        # Render: if UPLOAD_DIR isn't explicitly provided, default to the persistent
+        # disk mount (Blueprint typically mounts at /var/data).
+        if env == "production" and not os.getenv("UPLOAD_DIR") and os.getenv("RENDER_SERVICE_ID"):
+            self.UPLOAD_DIR = "/var/data/uploads"
+
         # Always include the production public origins even if env overrides are incomplete.
         required_origins = {
             "https://seyirteperestaurantcafe.com",
@@ -114,6 +120,11 @@ class Settings(BaseSettings):
     # File Upload
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE: int = 5 * 1024 * 1024  # 5MB
+    
+    # Cloudinary (for permanent cloud image storage)
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
     
     class Config:
         env_file = ".env"

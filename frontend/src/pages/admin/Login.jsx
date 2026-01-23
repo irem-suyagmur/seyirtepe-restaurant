@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { Lock, Mail, Eye, EyeOff, ShieldCheck } from 'lucide-react'
@@ -13,6 +13,22 @@ const AdminLogin = () => {
   })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isWakingUp, setIsWakingUp] = useState(false)
+
+  // Backend'i uyandır (Render cold start için)
+  useEffect(() => {
+    const wakeUpBackend = async () => {
+      setIsWakingUp(true)
+      try {
+        await api.get('/categories', { timeout: 5000 })
+      } catch (error) {
+        console.log('Backend warming up...')
+      } finally {
+        setIsWakingUp(false)
+      }
+    }
+    wakeUpBackend()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -55,11 +71,14 @@ const AdminLogin = () => {
     }
 
     setIsSubmitting(true)
+    setErrors({}) // Önceki hataları temizle
 
     try {
       const res = await api.post('/auth/login', {
         email: formData.email,
         password: formData.password,
+      }, {
+        timeout: 60000 // 60 saniye (Render cold start)
       })
 
       const token = res?.data?.access_token
@@ -73,7 +92,11 @@ const AdminLogin = () => {
 
     } catch (error) {
       const status = error?.response?.status
-      if (status === 401) {
+      const isTimeout = error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')
+      
+      if (isTimeout) {
+        setErrors({ password: 'Sunucu yanıt vermiyor. Lütfen 1-2 dakika bekleyip tekrar deneyin.' })
+      } else if (status === 401) {
         setErrors({ password: 'E-posta veya şifre hatalı' })
       } else {
         setErrors({ password: 'Giriş yapılırken bir hata oluştu' })
@@ -108,6 +131,14 @@ const AdminLogin = () => {
             <p className="text-sm sm:text-base text-white/60">
               Seyirtepe Restaurant Yönetim Sistemi
             </p>
+            
+            {/* Wake-up Indicator */}
+            {isWakingUp && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent"></div>
+                <span className="text-xs text-amber-400">Server başlatılıyor...</span>
+              </div>
+            )}
           </div>
 
           {/* Login Card */}
@@ -192,7 +223,7 @@ const AdminLogin = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isWakingUp}
                 className="w-full px-6 py-3 sm:py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 {isSubmitting ? (

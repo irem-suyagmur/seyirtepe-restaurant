@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Upload, Image as ImageIcon, Search, Package, DollarSign, Grid3x3, Filter } from 'lucide-react';
-import api from '../../services/api';
-
-const getBackendOrigin = () => {
-  const base = api?.defaults?.baseURL || '';
-  return String(base).replace(/\/?api\/v1\/?$/, '').replace(/\/+$/, '');
-};
+import api, { toAbsoluteApiUrl, normalizeUploadsUrl } from '../../services/api';
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -37,10 +32,11 @@ function Products() {
   const fetchProducts = async () => {
     try {
       const response = await api.get('/products');
-      setProducts(response.data);
+      setProducts(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showMessage('error', 'Ürünler yüklenirken hata oluştu');
       console.error('Error fetching products:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -49,9 +45,10 @@ function Products() {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories');
-      setCategories(response.data);
+      setCategories(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setCategories([]);
     }
   };
 
@@ -167,12 +164,12 @@ function Products() {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        const backendOrigin = getBackendOrigin();
-        const uploadedUrl = response?.data?.url ? `${backendOrigin}${response.data.url}` : '';
+        const uploadedUrl = response?.data?.url ? String(response.data.url) : '';
         if (!uploadedUrl) {
           throw new Error('Upload response missing url');
         }
 
+        // Store relative URL (e.g. /uploads/products/..) so domain changes won't break.
         setFormData((prev) => ({ ...prev, image_url: uploadedUrl }));
         if (localImagePreview?.startsWith('blob:')) {
           URL.revokeObjectURL(localImagePreview);
@@ -346,7 +343,7 @@ function Products() {
               {product.image_url ? (
                 <>
                   <img
-                    src={product.image_url}
+                    src={toAbsoluteApiUrl(normalizeUploadsUrl(product.image_url))}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -559,7 +556,7 @@ function Products() {
                         {(localImagePreview || formData.image_url) ? (
                           <div className="relative w-full h-full">
                             <img
-                              src={localImagePreview || formData.image_url}
+                              src={localImagePreview || toAbsoluteApiUrl(normalizeUploadsUrl(formData.image_url))}
                               alt="Preview"
                               className="w-full h-full object-contain rounded-xl"
                             />

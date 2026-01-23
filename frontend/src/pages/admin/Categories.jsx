@@ -23,10 +23,11 @@ export default function Categories() {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories');
-      setCategories(response.data);
+      setCategories(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showMessage('error', 'Kategoriler yüklenirken hata oluştu');
       console.error('Error fetching categories:', error);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
