@@ -20,14 +20,21 @@ const Menu = () => {
   const fetchMenuData = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getCategoriesWithProducts();
+      setError(null);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 15000)
+      );
+      const data = await Promise.race([
+        getCategoriesWithProducts(),
+        timeoutPromise
+      ]);
       const categories = Array.isArray(data) ? data : [];
       setCategories(categories);
       if (categories.length > 0) {
         setSelectedCategory(categories[0].id);
       }
     } catch (err) {
-      setError('Menü yüklenirken bir hata oluştu.');
+      setError(err.message === 'Timeout' ? 'Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin.' : 'Menü yüklenirken bir hata oluştu.');
       console.error('Menu fetch error:', err);
       setCategories([]);
     } finally {
@@ -42,10 +49,16 @@ const Menu = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin">
-          <Loader2 className="w-12 h-12 text-amber-500" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6">
+        <div className="relative">
+          <div className="animate-spin">
+            <Loader2 className="w-16 h-16 text-amber-500" />
+          </div>
+          <div className="absolute inset-0 animate-ping">
+            <Loader2 className="w-16 h-16 text-amber-500/30" />
+          </div>
         </div>
+        <p className="text-white/60 text-lg animate-pulse">Lezzetler yükleniyor...</p>
       </div>
     );
   }
@@ -205,10 +218,13 @@ const ProductCard = memo(({ product }) => {
                 src={toAbsoluteApiUrl(normalizeUploadsUrl(product.image_url))}
                 alt={product.name}
                 loading="lazy"
+                decoding="async"
+                fetchpriority="low"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-            </>
+            <>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <ChefHat className="w-20 h-20 text-amber-500/30" />

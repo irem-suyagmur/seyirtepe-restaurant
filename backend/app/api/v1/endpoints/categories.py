@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.database import get_db
@@ -21,13 +22,18 @@ def get_categories(db: Session = Depends(get_db)):
 
 @router.get("/with-products", response_model=List[CategoryWithProducts])
 def get_categories_with_products(db: Session = Depends(get_db)):
-    """Tüm kategorileri ürünleriyle birlikte listele"""
+    """Tüm kategorileri ürünleriyle birlikte listele - Cache ile optimized"""
     categories = (
         db.query(CategoryModel)
         .options(joinedload(CategoryModel.products))
+        .filter(CategoryModel.is_active == True)
         .order_by(CategoryModel.display_order)
         .all()
     )
+    
+    # Browser cache için header ekle (5 dakika)
+    response = JSONResponse(content=[cat.__dict__ for cat in categories])
+    response.headers["Cache-Control"] = "public, max-age=300"
     return categories
 
 
