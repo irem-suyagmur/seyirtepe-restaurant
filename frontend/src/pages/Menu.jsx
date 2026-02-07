@@ -219,12 +219,12 @@ const ProductCard = memo(({ product }) => {
                 alt={product.name}
                 loading="lazy"
                 decoding="async"
-                fetchpriority="low"
+                fetchPriority="low"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-            <>
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <ChefHat className="w-20 h-20 text-amber-500/30" />
