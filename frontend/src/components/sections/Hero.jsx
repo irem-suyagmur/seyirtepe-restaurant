@@ -15,7 +15,7 @@ const Hero = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20">
               <MapPin className="w-4 h-4 text-amber-400" />
-              <span className="text-sm font-medium text-white/90">Amik Ovası, Hatay</span>
+              <span className="text-sm font-medium text-white/90">Amik Ovası, Belen, Hatay</span>
             </div>
 
             {/* Headline */}
