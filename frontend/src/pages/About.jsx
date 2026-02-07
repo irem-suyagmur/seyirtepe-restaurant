@@ -44,13 +44,8 @@ const About = () => {
       <div className="min-h-screen">
         {/* Hero Section */}
         <div className="relative h-[40vh] sm:h-[50vh] min-h-[300px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url('/assets/images/parallax/amik-ovasi.jpg')`,
-            }}
-          />
+          {/* Background (no external asset dependency) */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/60 to-amber-900/10" />
           <div className="relative z-10 text-center px-4">
             <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-amber-500/20 border border-amber-500/30 backdrop-blur-xl mb-4 sm:mb-6">
               <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />

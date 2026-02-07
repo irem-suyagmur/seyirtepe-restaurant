@@ -7,8 +7,8 @@ const Hero = () => {
       {/* Parallax Background - Placeholder */}
       <Parallax
         blur={0}
-        bgImage="/assets/images/parallax/amik-ovasi.jpg"
-        bgImageAlt="Amik Ovası Manzarası"
+        bgImage="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+        bgImageAlt=""
         strength={200}
         className="h-full w-full"
       >
