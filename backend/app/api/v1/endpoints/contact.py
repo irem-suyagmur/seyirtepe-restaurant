@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.schemas.contact import ContactMessage
@@ -14,8 +14,11 @@ async def send_contact_message(
 ):
     """İletişim formu mesajı gönder"""
     email_service = EmailService()
-    await email_service.send_contact_email(message)
-    return {"message": "Message sent successfully"}
+    try:
+        await email_service.send_contact_email(message)
+        return {"message": "Message sent successfully"}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Email gönderilemedi: {exc}")
 
 
 @router.get("/info")

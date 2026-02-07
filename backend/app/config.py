@@ -116,6 +116,8 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     EMAILS_FROM_EMAIL: str = "info@seyirtepe.com"
     EMAILS_FROM_NAME: str = "Seyirtepe Restaurant"
+    # Contact form recipient
+    CONTACT_TO_EMAIL: str = "umitsabir@hotmail.com"
     
     # File Upload
     UPLOAD_DIR: str = "uploads"
