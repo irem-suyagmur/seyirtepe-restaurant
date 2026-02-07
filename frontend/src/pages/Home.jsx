@@ -41,7 +41,7 @@ const Home = () => {
               </div>
               <div className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
-                <span>Amik Ovası, Hatay</span>
+                <span>Amik Ovası, Belen, Hatay</span>
               </div>
             </div>
           </div>
