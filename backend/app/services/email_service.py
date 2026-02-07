@@ -16,7 +16,9 @@ class EmailService:
             raise RuntimeError("SMTP credentials are not configured (SMTP_HOST/SMTP_USER/SMTP_PASSWORD)")
 
         msg = MIMEMultipart()
-        msg['From'] = settings.EMAILS_FROM_EMAIL
+        from_name = (settings.EMAILS_FROM_NAME or "").strip()
+        from_email = (settings.EMAILS_FROM_EMAIL or "").strip()
+        msg['From'] = f"{from_name} <{from_email}>" if from_name else from_email
         msg['To'] = settings.CONTACT_TO_EMAIL
         # Make it easy to reply to the user who filled the form
         msg['Reply-To'] = str(message.email)
@@ -37,8 +39,15 @@ class EmailService:
         msg.attach(MIMEText(body, 'plain'))
         
         # Port 465 uses implicit TLS, 587 typically uses STARTTLS.
-        use_tls = int(settings.SMTP_PORT) == 465
-        start_tls = not use_tls
+        default_use_tls = int(settings.SMTP_PORT) == 465
+        default_starttls = not default_use_tls
+
+        use_tls = default_use_tls if settings.SMTP_USE_TLS is None else bool(settings.SMTP_USE_TLS)
+        start_tls = default_starttls if settings.SMTP_STARTTLS is None else bool(settings.SMTP_STARTTLS)
+
+        # Avoid invalid combination
+        if use_tls and start_tls:
+            start_tls = False
 
         await aiosmtplib.send(
             msg,

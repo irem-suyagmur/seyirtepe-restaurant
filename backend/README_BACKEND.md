@@ -50,6 +50,27 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
+## SMTP (İletişim Formu E‑posta)
+
+İletişim formu mesajlarının mail olarak düşmesi için SMTP ayarlarını yapmanız gerekir.
+
+Gerekli env değişkenleri:
+
+```env
+CONTACT_TO_EMAIL=umitsabir@hotmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASSWORD=...
+EMAILS_FROM_EMAIL=...
+EMAILS_FROM_NAME=Seyirtepe Restaurant
+```
+
+Notlar:
+- `SMTP_PORT=587` için genelde STARTTLS kullanılır.
+- `SMTP_PORT=465` için genelde TLS (implicit) kullanılır.
+- Gmail kullanıyorsanız şifre olarak "App Password" gerekir.
+
 ## Kullanım
 
 ### 1. Sunucuyu Başlat

@@ -114,6 +114,9 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
+    # Optional overrides (if unset, service chooses sane defaults based on port)
+    SMTP_USE_TLS: Optional[bool] = None
+    SMTP_STARTTLS: Optional[bool] = None
     EMAILS_FROM_EMAIL: str = "info@seyirtepe.com"
     EMAILS_FROM_NAME: str = "Seyirtepe Restaurant"
     # Contact form recipient

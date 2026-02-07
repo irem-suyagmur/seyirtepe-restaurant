@@ -17,6 +17,24 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAILS_FROM_EMAIL
+        sync: false
+      - key: EMAILS_FROM_NAME
+        sync: false
+      - key: SMTP_USE_TLS
+        sync: false
+      - key: SMTP_STARTTLS
+        sync: false
       - key: UPLOAD_DIR
         value: /var/data/uploads
     autoDeploy: true
