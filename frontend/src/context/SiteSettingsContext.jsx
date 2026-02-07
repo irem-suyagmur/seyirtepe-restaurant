@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import { getSiteSettings, toAbsoluteApiUrl, normalizeUploadsUrl } from '../services/api'
 
 const SiteSettingsContext = createContext(null)
 
@@ -38,18 +39,32 @@ export function SiteSettingsProvider({ children }) {
   const [aboutContent, setAboutContent] = useState(DEFAULT_ABOUT)
   const [siteLogo, setSiteLogo] = useState(null)
 
+  const normalizeLogoUrl = useCallback((value) => {
+    if (!value) return null
+    return toAbsoluteApiUrl(normalizeUploadsUrl(value))
+  }, [])
+
   const reloadFromStorage = () => {
     const savedAbout = safeReadJSON('aboutContent')
-    const savedLogo = safeReadString('siteLogo')
 
     if (savedAbout) setAboutContent({ ...DEFAULT_ABOUT, ...savedAbout })
     else setAboutContent(DEFAULT_ABOUT)
-
-    setSiteLogo(savedLogo)
   }
+
+  const refreshRemoteSettings = useCallback(async () => {
+    try {
+      const data = await getSiteSettings()
+      const nextLogo = normalizeLogoUrl(data?.logo_url)
+      setSiteLogo(nextLogo)
+      return nextLogo
+    } catch {
+      return null
+    }
+  }, [normalizeLogoUrl])
 
   useEffect(() => {
     reloadFromStorage()
+    refreshRemoteSettings()
 
     const onStorage = (e) => {
       if (!e || !e.key || e.key === 'aboutContent' || e.key === 'siteLogo') {
@@ -70,11 +85,13 @@ export function SiteSettingsProvider({ children }) {
         setAboutContent((prev) => ({ ...prev, ...next }))
       },
       setSiteLogo: (next) => {
-        setSiteLogo(next)
+        setSiteLogo(normalizeLogoUrl(next))
       },
       reloadFromStorage
+      ,
+      refreshRemoteSettings
     }),
-    [aboutContent, siteLogo]
+    [aboutContent, siteLogo, normalizeLogoUrl, refreshRemoteSettings]
   )
 
   return <SiteSettingsContext.Provider value={value}>{children}</SiteSettingsContext.Provider>

@@ -10,16 +10,17 @@ import {
   Users, 
   Settings, 
   LogOut,
-  ChefHat,
   Globe,
   Image
 } from 'lucide-react'
 import AdminNotifier from './AdminNotifier'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const isAuthenticated = localStorage.getItem('adminToken')
+  const { siteLogo } = useSiteSettings()
 
   useEffect(() => {
     setSidebarOpen(false)
@@ -56,9 +57,14 @@ const AdminLayout = () => {
         <div className="h-full px-3 py-4 backdrop-blur-2xl bg-white/5 border-r border-white/10 flex flex-col">
           {/* Logo */}
           <div className="flex items-center gap-3 px-4 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-              <ChefHat className="w-6 h-6 text-white" />
-            </div>
+            {siteLogo ? (
+              <img
+                src={siteLogo}
+                alt="Site Logo"
+                className="h-10 w-auto object-contain max-w-[140px]"
+                onError={() => {}}
+              />
+            ) : null}
             <div>
               <h2 className="text-white font-bold text-lg">Seyirtepe</h2>
               <p className="text-xs text-white/60">Admin Panel</p>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, ChefHat } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter } from 'lucide-react';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const Footer = () => {
@@ -24,9 +24,6 @@ const Footer = () => {
                 />
               ) : (
                 <div className="flex items-center gap-3">
-                  <div className="bg-gradient-to-br from-amber-400 to-orange-600 p-2.5 rounded-xl shadow-lg group-hover:shadow-amber-500/50 transition-shadow">
-                    <ChefHat className="w-6 h-6 text-white" />
-                  </div>
                   <div className="flex flex-col">
                     <span className="text-xl font-bold text-white">Seyirtepe</span>
                     <span className="text-xs text-amber-400 -mt-1">RESTAURANT & CAFE</span>

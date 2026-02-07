@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSiteSettings } from '../../context/SiteSettingsContext'
+import { uploadSiteLogo, deleteSiteLogo } from '../../services/api'
 import { 
   Save, 
   Image as ImageIcon, 
@@ -12,14 +13,14 @@ import {
 } from 'lucide-react'
 
 const SiteSettings = () => {
-  const { aboutContent: ctxAbout, siteLogo: ctxLogo, setAboutContent: setCtxAbout, setSiteLogo: setCtxLogo } = useSiteSettings()
+  const { aboutContent: ctxAbout, siteLogo: ctxLogo, setAboutContent: setCtxAbout, setSiteLogo: setCtxLogo, refreshRemoteSettings } = useSiteSettings()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
   
   // Logo state
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState('')
-  const [currentLogo, setCurrentLogo] = useState('/logo.png')
+  const [currentLogo, setCurrentLogo] = useState('')
   
   // About content state
   const [aboutContent, setAboutContent] = useState({
@@ -75,19 +76,18 @@ const SiteSettings = () => {
     setMessage({ type: '', text: '' })
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
       // Save to localStorage (TODO: Replace with backend API)
       localStorage.setItem('aboutContent', JSON.stringify(aboutContent))
       setCtxAbout(aboutContent)
       
-      if (logoPreview) {
-        localStorage.setItem('siteLogo', logoPreview)
-        setCtxLogo(logoPreview)
-        setCurrentLogo(logoPreview)
+      if (logoFile) {
+        const uploaded = await uploadSiteLogo(logoFile)
+        const nextLogoUrl = uploaded?.logo_url || ''
+        setCtxLogo(nextLogoUrl)
+        setCurrentLogo(nextLogoUrl)
         setLogoPreview('')
         setLogoFile(null)
+        await refreshRemoteSettings()
       }
 
       // Back-compat: keep existing event dispatch for any remaining listeners
@@ -116,6 +116,23 @@ const SiteSettings = () => {
   const removeLogo = () => {
     setLogoFile(null)
     setLogoPreview('')
+  }
+
+  const removeCurrentLogo = async () => {
+    setLoading(true)
+    setMessage({ type: '', text: '' })
+    try {
+      await deleteSiteLogo()
+      setCtxLogo(null)
+      setCurrentLogo('')
+      await refreshRemoteSettings()
+      setMessage({ type: 'success', text: 'Logo kaldırıldı.' })
+      setTimeout(() => setMessage({ type: '', text: '' }), 2000)
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Logo kaldırılamadı: ' + error.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -180,14 +197,30 @@ const SiteSettings = () => {
               Mevcut Logo
             </label>
             <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-center h-48">
-              <img 
-                src={currentLogo} 
-                alt="Current Logo" 
-                className="max-h-full max-w-full object-contain"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/200x80?text=Logo'
-                }}
-              />
+              {currentLogo ? (
+                <img 
+                  src={currentLogo} 
+                  alt="Current Logo" 
+                  className="max-h-full max-w-full object-contain"
+                  onError={() => {
+                    setCurrentLogo('')
+                  }}
+                />
+              ) : (
+                <div className="text-center">
+                  <p className="text-white/50 text-sm">Henüz logo yüklenmedi</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-3 flex justify-end">
+              <button
+                type="button"
+                onClick={removeCurrentLogo}
+                disabled={loading || !currentLogo}
+                className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Logoyu Kaldır
+              </button>
             </div>
           </div>
 

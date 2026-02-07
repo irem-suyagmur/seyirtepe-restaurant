@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, categories, products, reservations, gallery, contact, reviews, orders
+from app.api.v1.endpoints import auth, categories, products, reservations, gallery, contact, reviews, orders, site_settings
 
 api_router = APIRouter()
 
@@ -11,3 +11,4 @@ api_router.include_router(reservations.router, prefix="/reservations", tags=["re
 api_router.include_router(gallery.router, prefix="/gallery", tags=["gallery"])
 api_router.include_router(contact.router, prefix="/contact", tags=["contact"])
 api_router.include_router(reviews.router, prefix="/reviews", tags=["reviews"])
+api_router.include_router(site_settings.router, prefix="/settings", tags=["settings"])

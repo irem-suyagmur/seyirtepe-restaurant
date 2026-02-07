@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChefHat } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const Navigation = () => {
@@ -59,13 +59,6 @@ const Navigation = () => {
                 />
               ) : (
                 <>
-                  <motion.div
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6 }}
-                    className="bg-gradient-to-br from-primary-400 to-primary-600 p-2.5 rounded-xl shadow-lg group-hover:shadow-primary-500/50"
-                  >
-                    <ChefHat className="w-6 h-6 text-white" />
-                  </motion.div>
                   <div className="flex flex-col">
                     <span className="text-2xl font-bold bg-gradient-to-r from-white via-primary-200 to-primary-300 bg-clip-text text-transparent">
                       Seyirtepe

@@ -147,4 +147,27 @@ export const getContactInfo = async () => {
   return response.data;
 };
 
+// Site Settings API
+export const getSiteSettings = async () => {
+  const response = await api.get('/settings');
+  return response.data;
+};
+
+export const uploadSiteLogo = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/settings/logo', formData, {
+    headers: {
+      // Let the browser set the multipart boundary
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const deleteSiteLogo = async () => {
+  const response = await api.delete('/settings/logo');
+  return response.data;
+};
+
 export default api
