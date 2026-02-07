@@ -185,18 +185,12 @@ const Menu = () => {
 // Optimized Product Card with memo
 const ProductCard = memo(({ product }) => {
   const { addToCart } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
   
   const handleAddToCart = useCallback(() => {
     addToCart(product);
-    // Show a brief notification (optional)
-    const btn = document.activeElement;
-    const originalText = btn?.textContent;
-    if (btn) {
-      btn.textContent = 'Sepete Eklendi!';
-      setTimeout(() => {
-        if (btn) btn.textContent = originalText;
-      }, 1000);
-    }
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 1000);
   }, [product, addToCart]);
 
   return (
@@ -258,6 +252,7 @@ const ProductCard = memo(({ product }) => {
 
           {/* Action Button */}
           <button 
+            type="button"
             onClick={handleAddToCart}
             className="w-full relative overflow-hidden group/btn"
           >
@@ -265,7 +260,7 @@ const ProductCard = memo(({ product }) => {
             <div className="relative px-6 py-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 group-hover/btn:border-transparent transition-all duration-300 flex items-center justify-center gap-2">
               <ShoppingCart className="w-5 h-5 text-amber-400 group-hover/btn:text-white transition-colors duration-300" />
               <span className="text-amber-400 group-hover/btn:text-white font-semibold transition-colors duration-300">
-                Sepete Ekle
+                {justAdded ? 'Sepete Eklendi!' : 'Sepete Ekle'}
               </span>
             </div>
           </button>
